@@ -1,0 +1,279 @@
+import React from 'react';
+import {
+  Sparkles,
+  Landmark,
+  Hotel,
+  Home,
+  Trophy,
+  GraduationCap,
+  Calendar,
+  PartyPopper,
+  Shapes,
+  Music,
+  Briefcase,
+  Building2,
+  UtensilsCrossed,
+  LucideIcon,
+} from 'lucide-react';
+
+export interface CategoryMeta {
+  id: string;
+  name: string;
+  shortName: string;
+  subtitle: string;
+  icon: LucideIcon;
+  // Gradient for the vibrant icon circle
+  iconGradient: string;
+  // Soft card background tint
+  cardBg: string;
+  // Subtle card border
+  borderColor: string;
+  // Active state styling with vibrant gradient & glow
+  activeBg: string;
+  activeBorder: string;
+  activeGlow: string;
+  textColor: string;
+  badge?: string;
+  badgeBg: string;
+  badgeText: string;
+}
+
+export const CATEGORY_CONFIG: Record<string, CategoryMeta> = {
+  all: {
+    id: 'all',
+    name: 'All Spaces',
+    shortName: 'All Spaces',
+    subtitle: 'Browse all spaces',
+    icon: Sparkles,
+    iconGradient: 'from-indigo-500 to-violet-600 text-white shadow-indigo-200',
+    cardBg: 'bg-indigo-50/60 hover:bg-indigo-50',
+    borderColor: 'border-indigo-200/80 hover:border-indigo-300',
+    activeBg: 'bg-gradient-to-br from-indigo-600 to-violet-700 text-white',
+    activeBorder: 'border-indigo-600',
+    activeGlow: 'shadow-lg shadow-indigo-500/25 ring-2 ring-indigo-400/50',
+    textColor: 'text-indigo-700',
+    badge: 'EXPLORE',
+    badgeBg: 'bg-indigo-100',
+    badgeText: 'text-indigo-700',
+  },
+  function_hall: {
+    id: 'function_hall',
+    name: 'Function Halls',
+    shortName: 'Functions',
+    subtitle: 'Marriage & banquets',
+    icon: Landmark,
+    iconGradient: 'from-rose-500 to-pink-600 text-white shadow-rose-200',
+    cardBg: 'bg-rose-50/60 hover:bg-rose-50',
+    borderColor: 'border-rose-200/80 hover:border-rose-300',
+    activeBg: 'bg-gradient-to-br from-rose-600 to-pink-700 text-white',
+    activeBorder: 'border-rose-600',
+    activeGlow: 'shadow-lg shadow-rose-500/25 ring-2 ring-rose-400/50',
+    textColor: 'text-rose-700',
+    badge: 'POPULAR',
+    badgeBg: 'bg-rose-100',
+    badgeText: 'text-rose-700',
+  },
+  marriage_hall: {
+    id: 'marriage_hall',
+    name: 'Marriage Halls',
+    shortName: 'Weddings',
+    subtitle: 'Grand wedding stages',
+    icon: PartyPopper,
+    iconGradient: 'from-pink-500 to-fuchsia-600 text-white shadow-pink-200',
+    cardBg: 'bg-pink-50/60 hover:bg-pink-50',
+    borderColor: 'border-pink-200/80 hover:border-pink-300',
+    activeBg: 'bg-gradient-to-br from-pink-600 to-fuchsia-700 text-white',
+    activeBorder: 'border-pink-600',
+    activeGlow: 'shadow-lg shadow-pink-500/25 ring-2 ring-pink-400/50',
+    textColor: 'text-pink-700',
+    badge: 'ROYAL',
+    badgeBg: 'bg-pink-100',
+    badgeText: 'text-pink-700',
+  },
+  banquet_hall: {
+    id: 'banquet_hall',
+    name: 'Banquet Halls',
+    shortName: 'Banquets',
+    subtitle: 'Dining & gatherings',
+    icon: UtensilsCrossed,
+    iconGradient: 'from-orange-500 to-amber-600 text-white shadow-amber-200',
+    cardBg: 'bg-amber-50/60 hover:bg-amber-50',
+    borderColor: 'border-amber-200/80 hover:border-amber-300',
+    activeBg: 'bg-gradient-to-br from-amber-600 to-orange-700 text-white',
+    activeBorder: 'border-amber-600',
+    activeGlow: 'shadow-lg shadow-amber-500/25 ring-2 ring-amber-400/50',
+    textColor: 'text-amber-800',
+    badge: 'CATERING',
+    badgeBg: 'bg-amber-100',
+    badgeText: 'text-amber-800',
+  },
+  hourly_rooms: {
+    id: 'hourly_rooms',
+    name: 'Lodge / Rooms',
+    shortName: 'Hourly Stays',
+    subtitle: '24h & hourly bookings',
+    icon: Hotel,
+    iconGradient: 'from-sky-500 to-blue-600 text-white shadow-sky-200',
+    cardBg: 'bg-sky-50/60 hover:bg-sky-50',
+    borderColor: 'border-sky-200/80 hover:border-sky-300',
+    activeBg: 'bg-gradient-to-br from-sky-600 to-blue-700 text-white',
+    activeBorder: 'border-sky-600',
+    activeGlow: 'shadow-lg shadow-sky-500/25 ring-2 ring-sky-400/50',
+    textColor: 'text-sky-700',
+    badge: 'HOURLY',
+    badgeBg: 'bg-sky-100',
+    badgeText: 'text-sky-700',
+  },
+  hotel_stay: {
+    id: 'hotel_stay',
+    name: 'Hotels & Stays',
+    shortName: 'Hotels',
+    subtitle: 'Premium rooms & suites',
+    icon: Building2,
+    iconGradient: 'from-cyan-500 to-teal-600 text-white shadow-cyan-200',
+    cardBg: 'bg-cyan-50/60 hover:bg-cyan-50',
+    borderColor: 'border-cyan-200/80 hover:border-cyan-300',
+    activeBg: 'bg-gradient-to-br from-cyan-600 to-teal-700 text-white',
+    activeBorder: 'border-cyan-600',
+    activeGlow: 'shadow-lg shadow-cyan-500/25 ring-2 ring-cyan-400/50',
+    textColor: 'text-cyan-700',
+    badge: 'PREMIUM',
+    badgeBg: 'bg-cyan-100',
+    badgeText: 'text-cyan-700',
+  },
+  pg_hostel: {
+    id: 'pg_hostel',
+    name: 'PG & Hostels',
+    shortName: 'Co-Living',
+    subtitle: 'Gents, ladies & shared',
+    icon: Home,
+    iconGradient: 'from-emerald-500 to-teal-600 text-white shadow-emerald-200',
+    cardBg: 'bg-emerald-50/60 hover:bg-emerald-50',
+    borderColor: 'border-emerald-200/80 hover:border-emerald-300',
+    activeBg: 'bg-gradient-to-br from-emerald-600 to-teal-700 text-white',
+    activeBorder: 'border-emerald-600',
+    activeGlow: 'shadow-lg shadow-emerald-500/25 ring-2 ring-emerald-400/50',
+    textColor: 'text-emerald-700',
+    badge: 'VERIFIED',
+    badgeBg: 'bg-emerald-100',
+    badgeText: 'text-emerald-700',
+  },
+  sports_turf: {
+    id: 'sports_turf',
+    name: 'Sports & Turfs',
+    shortName: 'Sports Turf',
+    subtitle: 'Box cricket & courts',
+    icon: Trophy,
+    iconGradient: 'from-amber-500 to-emerald-600 text-white shadow-emerald-200',
+    cardBg: 'bg-emerald-50/50 hover:bg-emerald-50/80',
+    borderColor: 'border-emerald-200/80 hover:border-emerald-300',
+    activeBg: 'bg-gradient-to-br from-amber-600 to-emerald-700 text-white',
+    activeBorder: 'border-emerald-600',
+    activeGlow: 'shadow-lg shadow-emerald-500/25 ring-2 ring-emerald-400/50',
+    textColor: 'text-emerald-800',
+    badge: 'HOURLY',
+    badgeBg: 'bg-emerald-100',
+    badgeText: 'text-emerald-800',
+  },
+  coaching: {
+    id: 'coaching',
+    name: 'Classes & Coaching',
+    shortName: 'Academies',
+    subtitle: 'IT, coaching & study halls',
+    icon: GraduationCap,
+    iconGradient: 'from-purple-500 to-indigo-600 text-white shadow-purple-200',
+    cardBg: 'bg-purple-50/60 hover:bg-purple-50',
+    borderColor: 'border-purple-200/80 hover:border-purple-300',
+    activeBg: 'bg-gradient-to-br from-purple-600 to-indigo-700 text-white',
+    activeBorder: 'border-purple-600',
+    activeGlow: 'shadow-lg shadow-purple-500/25 ring-2 ring-purple-400/50',
+    textColor: 'text-purple-700',
+    badge: 'ACADEMIC',
+    badgeBg: 'bg-purple-100',
+    badgeText: 'text-purple-700',
+  },
+  dance_studio: {
+    id: 'dance_studio',
+    name: 'Studios & Dance',
+    shortName: 'Studios',
+    subtitle: 'Dance, music & fitness',
+    icon: Music,
+    iconGradient: 'from-fuchsia-500 to-rose-600 text-white shadow-fuchsia-200',
+    cardBg: 'bg-fuchsia-50/60 hover:bg-fuchsia-50',
+    borderColor: 'border-fuchsia-200/80 hover:border-fuchsia-300',
+    activeBg: 'bg-gradient-to-br from-fuchsia-600 to-rose-700 text-white',
+    activeBorder: 'border-fuchsia-600',
+    activeGlow: 'shadow-lg shadow-fuchsia-500/25 ring-2 ring-fuchsia-400/50',
+    textColor: 'text-fuchsia-700',
+    badge: 'CREATIVE',
+    badgeBg: 'bg-fuchsia-100',
+    badgeText: 'text-fuchsia-700',
+  },
+  events: {
+    id: 'events',
+    name: 'Events & Expos',
+    shortName: 'Expos & Meets',
+    subtitle: 'Exhibitions & workshops',
+    icon: Calendar,
+    iconGradient: 'from-teal-500 to-cyan-600 text-white shadow-teal-200',
+    cardBg: 'bg-teal-50/60 hover:bg-teal-50',
+    borderColor: 'border-teal-200/80 hover:border-teal-300',
+    activeBg: 'bg-gradient-to-br from-teal-600 to-cyan-700 text-white',
+    activeBorder: 'border-teal-600',
+    activeGlow: 'shadow-lg shadow-teal-500/25 ring-2 ring-teal-400/50',
+    textColor: 'text-teal-700',
+    badge: 'EVENTS',
+    badgeBg: 'bg-teal-100',
+    badgeText: 'text-teal-700',
+  },
+  co_working: {
+    id: 'co_working',
+    name: 'Co-Working Desks',
+    shortName: 'Co-Working',
+    subtitle: 'Hot desks & meeting rooms',
+    icon: Briefcase,
+    iconGradient: 'from-blue-600 to-indigo-700 text-white shadow-blue-200',
+    cardBg: 'bg-blue-50/60 hover:bg-blue-50',
+    borderColor: 'border-blue-200/80 hover:border-blue-300',
+    activeBg: 'bg-gradient-to-br from-blue-600 to-indigo-700 text-white',
+    activeBorder: 'border-blue-600',
+    activeGlow: 'shadow-lg shadow-blue-500/25 ring-2 ring-blue-400/50',
+    textColor: 'text-blue-700',
+    badge: 'WORK',
+    badgeBg: 'bg-blue-100',
+    badgeText: 'text-blue-700',
+  },
+};
+
+export const getCategoryMeta = (slug?: string): CategoryMeta => {
+  if (slug && CATEGORY_CONFIG[slug]) {
+    return CATEGORY_CONFIG[slug];
+  }
+  return {
+    id: slug || 'other',
+    name: slug?.replace(/_/g, ' ') || 'Other Space',
+    shortName: slug?.replace(/_/g, ' ') || 'Other',
+    subtitle: 'Custom listed spaces',
+    icon: Shapes,
+    iconGradient: 'from-slate-500 to-slate-700 text-white shadow-slate-200',
+    cardBg: 'bg-slate-50 hover:bg-slate-100',
+    borderColor: 'border-slate-200 hover:border-slate-300',
+    activeBg: 'bg-gradient-to-br from-slate-700 to-slate-900 text-white',
+    activeBorder: 'border-slate-800',
+    activeGlow: 'shadow-lg shadow-slate-500/25 ring-2 ring-slate-400/50',
+    textColor: 'text-slate-700',
+    badgeBg: 'bg-slate-100',
+    badgeText: 'text-slate-700',
+  };
+};
+
+export const CategoryIcon: React.FC<{
+  slug?: string;
+  className?: string;
+  size?: number;
+}> = ({ slug, className = 'w-5 h-5', size }) => {
+  const meta = getCategoryMeta(slug);
+  const IconComponent = meta.icon;
+  return <IconComponent className={className} size={size} />;
+};
+

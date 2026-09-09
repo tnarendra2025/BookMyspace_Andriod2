@@ -1,0 +1,10 @@
+{
+  "name": "BookMySpace",
+  "description": "Smart venue, court, hotel, PG hostel, and academy booking platform.",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

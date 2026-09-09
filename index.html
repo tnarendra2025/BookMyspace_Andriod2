@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <script>
+      (function() {
+        try {
+          var originalDefineProperty = Object.defineProperty;
+          Object.defineProperty = function(obj, prop, descriptor) {
+            if (obj === window && prop === 'fetch' && descriptor) {
+              if (descriptor.get && !descriptor.set) {
+                var currentVal;
+                var origGet = descriptor.get;
+                descriptor.set = function(val) {
+                  currentVal = val;
+                };
+                descriptor.get = function() {
+                  return currentVal !== undefined ? currentVal : origGet.call(this);
+                };
+                descriptor.configurable = true;
+                descriptor.enumerable = true;
+              }
+            }
+            return originalDefineProperty.call(this, obj, prop, descriptor);
+          };
+
+          var existingDesc = Object.getOwnPropertyDescriptor(window, 'fetch');
+          if (existingDesc && existingDesc.get && !existingDesc.set) {
+            var val;
+            var origGet = existingDesc.get;
+            originalDefineProperty.call(Object, window, 'fetch', {
+              get: function() {
+                return val !== undefined ? val : origGet.call(this);
+              },
+              set: function(newVal) {
+                val = newVal;
+              },
+              configurable: true,
+              enumerable: true
+            });
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>BookMySpace</title>
+    <meta name="description" content="Smart venue, court, hotel, PG hostel, and academy booking platform." />
+    <meta property="og:title" content="BookMySpace" />
+    <meta property="og:description" content="Smart venue, court, hotel, PG hostel, and academy booking platform." />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  </head>
+  <body class="bg-slate-50 text-slate-900 antialiased font-sans selection:bg-indigo-500 selection:text-white">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
