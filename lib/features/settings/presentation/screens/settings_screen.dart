@@ -65,6 +65,13 @@ class SettingsScreen extends ConsumerWidget {
             title: Text(l10n.about),
             onTap: () => _showAboutDialog(context, l10n),
           ),
+          ListTile(
+            leading: const Icon(Icons.bug_report_outlined),
+            title: const Text('Developer & Diagnostics'),
+            subtitle: const Text('Test mode, feature flags, mock accounts'),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => context.push(AppRoutes.debug),
+          ),
           const Divider(),
           ListTile(
             leading: Icon(

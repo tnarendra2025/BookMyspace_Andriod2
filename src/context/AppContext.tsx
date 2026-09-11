@@ -12,6 +12,7 @@ import {
   AppFeatureToggle,
   LocationHierarchy,
   ActiveScreen,
+  CustomerRegistrationField,
 } from '../types';
 import {
   SAMPLE_CATEGORIES,
@@ -24,6 +25,7 @@ import {
   INITIAL_FEATURE_TOGGLES,
   POPULAR_LOCATIONS,
 } from '../data/mockData';
+import { DEFAULT_CUSTOMER_REGISTRATION_FIELDS } from '../data/defaultRegistrationFields';
 
 interface AppContextType {
   // Navigation & Screen
@@ -96,6 +98,28 @@ interface AppContextType {
   setIsHelpChatOpen: (open: boolean) => void;
   isAIBookingOpen: boolean;
   setIsAIBookingOpen: (open: boolean) => void;
+
+  // Customer Registration & KYC Configuration (Editable by Owner & Admin)
+  customerRegistrationFields: CustomerRegistrationField[];
+  updateRegistrationField: (field: CustomerRegistrationField) => void;
+  toggleRegistrationFieldEnabled: (id: string) => void;
+  toggleRegistrationFieldRequired: (id: string) => void;
+  setRegistrationFieldRequirement: (id: string, mode: 'MANDATORY' | 'OPTIONAL' | 'DISABLED') => void;
+  batchSetRegistrationRequirement: (fieldIds: string[], mode: 'MANDATORY' | 'OPTIONAL' | 'DISABLED') => void;
+  applyRegistrationPreset: (presetKey: 'EXPRESS' | 'STRICT_POLICE' | 'HOSTEL_PG' | 'HOTEL_STANDARD' | 'FUNCTION_HALL' | 'BALANCED') => void;
+  addRegistrationField: (field: Omit<CustomerRegistrationField, 'id'>) => void;
+  deleteRegistrationField: (id: string) => void;
+  resetRegistrationFields: () => void;
+  reorderRegistrationFields: (startIndex: number, endIndex: number) => void;
+  duplicateRegistrationField: (id: string) => void;
+  dbSyncStatus: 'synced' | 'syncing' | 'error' | 'idle';
+  lastDbSyncedAt: number | null;
+  saveFieldsToDatabase: (fieldsToSave?: CustomerRegistrationField[]) => Promise<boolean>;
+  reloadFieldsFromDatabase: () => Promise<void>;
+
+  // Customer Registration Card Modal
+  registrationCardBooking: Booking | null;
+  setRegistrationCardBooking: (b: Booking | null) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -195,6 +219,437 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isHelpChatOpen, setIsHelpChatOpen] = useState<boolean>(false);
   const [isAIBookingOpen, setIsAIBookingOpen] = useState<boolean>(false);
 
+  // Customer Registration & KYC Configuration State (Editable by Owner & Admin)
+  const [customerRegistrationFields, setCustomerRegistrationFields] = useState<CustomerRegistrationField[]>(() => {
+    try {
+      const saved = localStorage.getItem('bms_customer_registration_fields');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.warn('Failed to load saved registration fields:', e);
+    }
+    return DEFAULT_CUSTOMER_REGISTRATION_FIELDS;
+  });
+
+  const [dbSyncStatus, setDbSyncStatus] = useState<'synced' | 'syncing' | 'error' | 'idle'>('idle');
+  const [lastDbSyncedAt, setLastDbSyncedAt] = useState<number | null>(null);
+  const [registrationCardBooking, setRegistrationCardBooking] = useState<Booking | null>(null);
+
+  // Load from persistent server database on mount
+  useEffect(() => {
+    let isMounted = true;
+    const fetchDbFields = async () => {
+      try {
+        setDbSyncStatus('syncing');
+        const res = await fetch('/api/registration-fields');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && Array.isArray(data.fields) && data.fields.length > 0) {
+            if (isMounted) {
+              setCustomerRegistrationFields(data.fields);
+              setDbSyncStatus('synced');
+              setLastDbSyncedAt(data.timestamp || Date.now());
+              try {
+                localStorage.setItem('bms_customer_registration_fields', JSON.stringify(data.fields));
+              } catch (_) {}
+            }
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Could not fetch registration fields from DB API, using local storage cache:', err);
+      }
+      if (isMounted) {
+        setDbSyncStatus('synced');
+      }
+    };
+
+    fetchDbFields();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Save fields to persistent database
+  const saveFieldsToDatabase = async (fieldsToSave?: CustomerRegistrationField[]): Promise<boolean> => {
+    const targetFields = fieldsToSave || customerRegistrationFields;
+    setDbSyncStatus('syncing');
+    try {
+      const res = await fetch('/api/registration-fields', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields: targetFields }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          setDbSyncStatus('synced');
+          setLastDbSyncedAt(Date.now());
+          try {
+            localStorage.setItem('bms_customer_registration_fields', JSON.stringify(targetFields));
+          } catch (_) {}
+          addAuditLog({
+            actorName: currentUser.fullName,
+            actorRole: currentUser.role,
+            action: 'REGISTRATION_FIELDS_SAVED_TO_DB',
+            entityType: 'DATABASE',
+            entityId: 'REGISTRATION_SCHEMA',
+            details: `Persisted ${targetFields.length} registration fields to server database.`,
+            status: 'SUCCESS',
+          });
+          return true;
+        }
+      }
+      setDbSyncStatus('error');
+      return false;
+    } catch (err) {
+      console.error('Error persisting fields to database:', err);
+      setDbSyncStatus('error');
+      return false;
+    }
+  };
+
+  const reloadFieldsFromDatabase = async () => {
+    setDbSyncStatus('syncing');
+    try {
+      const res = await fetch('/api/registration-fields');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.fields)) {
+          setCustomerRegistrationFields(data.fields);
+          setDbSyncStatus('synced');
+          setLastDbSyncedAt(data.timestamp || Date.now());
+          try {
+            localStorage.setItem('bms_customer_registration_fields', JSON.stringify(data.fields));
+          } catch (_) {}
+        }
+      }
+    } catch (err) {
+      console.error('Failed to reload fields from database:', err);
+      setDbSyncStatus('error');
+    }
+  };
+
+  // Auto-sync to localStorage & background database debounce
+  useEffect(() => {
+    try {
+      localStorage.setItem('bms_customer_registration_fields', JSON.stringify(customerRegistrationFields));
+    } catch (e) {
+      console.warn('Failed to persist registration fields:', e);
+    }
+
+    const timer = setTimeout(() => {
+      fetch('/api/registration-fields', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields: customerRegistrationFields }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            setDbSyncStatus('synced');
+            setLastDbSyncedAt(Date.now());
+          }
+        })
+        .catch((err) => {
+          console.warn('Background auto-save to DB skipped:', err);
+        });
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, [customerRegistrationFields]);
+
+  const updateRegistrationField = (updated: CustomerRegistrationField) => {
+    setCustomerRegistrationFields((prev) =>
+      prev.map((f) => (f.id === updated.id ? updated : f))
+    );
+    addAuditLog({
+      actorName: currentUser.fullName,
+      actorRole: currentUser.role,
+      action: 'REGISTRATION_FIELD_UPDATED',
+      entityType: 'GOVERNANCE',
+      entityId: updated.id,
+      details: `${currentUser.role} updated KYC field "${updated.label}".`,
+      status: 'SUCCESS',
+    });
+  };
+
+  const toggleRegistrationFieldEnabled = (id: string) => {
+    setCustomerRegistrationFields((prev) =>
+      prev.map((f) => (f.id === id ? { ...f, isEnabled: !f.isEnabled } : f))
+    );
+  };
+
+  const toggleRegistrationFieldRequired = (id: string) => {
+    setCustomerRegistrationFields((prev) =>
+      prev.map((f) => (f.id === id ? { ...f, isRequired: !f.isRequired } : f))
+    );
+  };
+
+  const setRegistrationFieldRequirement = (id: string, mode: 'MANDATORY' | 'OPTIONAL' | 'DISABLED') => {
+    setCustomerRegistrationFields((prev) =>
+      prev.map((f) => {
+        if (f.id !== id) return f;
+        if (mode === 'DISABLED') {
+          return { ...f, isEnabled: false };
+        }
+        return {
+          ...f,
+          isEnabled: true,
+          isRequired: mode === 'MANDATORY',
+        };
+      })
+    );
+    addAuditLog({
+      actorName: currentUser.fullName,
+      actorRole: currentUser.role,
+      action: 'REGISTRATION_FIELD_UPDATED',
+      entityType: 'GOVERNANCE',
+      entityId: id,
+      details: `${currentUser.role} configured field ${id} requirement to ${mode}.`,
+      status: 'SUCCESS',
+    });
+  };
+
+  const batchSetRegistrationRequirement = (fieldIds: string[], mode: 'MANDATORY' | 'OPTIONAL' | 'DISABLED') => {
+    setCustomerRegistrationFields((prev) =>
+      prev.map((f) => {
+        if (!fieldIds.includes(f.id)) return f;
+        if (mode === 'DISABLED') {
+          return { ...f, isEnabled: false };
+        }
+        return {
+          ...f,
+          isEnabled: true,
+          isRequired: mode === 'MANDATORY',
+        };
+      })
+    );
+    addAuditLog({
+      actorName: currentUser.fullName,
+      actorRole: currentUser.role,
+      action: 'REGISTRATION_FIELD_UPDATED',
+      entityType: 'GOVERNANCE',
+      entityId: 'BATCH',
+      details: `${currentUser.role} batch changed ${fieldIds.length} fields to ${mode}.`,
+      status: 'SUCCESS',
+    });
+  };
+
+  const applyRegistrationPreset = (
+    presetKey: 'EXPRESS' | 'STRICT_POLICE' | 'HOSTEL_PG' | 'HOTEL_STANDARD' | 'FUNCTION_HALL' | 'BALANCED'
+  ) => {
+    if (presetKey === 'BALANCED') {
+      setCustomerRegistrationFields(DEFAULT_CUSTOMER_REGISTRATION_FIELDS);
+      addAuditLog({
+        actorName: currentUser.fullName,
+        actorRole: currentUser.role,
+        action: 'REGISTRATION_PRESET_APPLIED',
+        entityType: 'GOVERNANCE',
+        entityId: 'BALANCED',
+        details: `${currentUser.role} restored standard balanced KYC presets.`,
+        status: 'SUCCESS',
+      });
+      return;
+    }
+
+    setCustomerRegistrationFields((prev) =>
+      prev.map((f) => {
+        if (presetKey === 'EXPRESS') {
+          // Express Check-in: Only name and phone mandatory, photo and id number optional, rest disabled
+          if (f.key === 'fullName' || f.key === 'phone') {
+            return { ...f, isEnabled: true, isRequired: true };
+          }
+          if (f.key === 'email' || f.key === 'livePhotoUrl' || f.key === 'idProofNumber') {
+            return { ...f, isEnabled: true, isRequired: false };
+          }
+          return { ...f, isEnabled: false, isRequired: false };
+        }
+
+        if (presetKey === 'STRICT_POLICE') {
+          // Strict Police Verification: complete statutory audit
+          const mandatoryKeys = [
+            'fullName',
+            'phone',
+            'emergencyPhone',
+            'email',
+            'livePhotoUrl',
+            'idProofType',
+            'idProofNumber',
+            'idProofFrontUrl',
+            'address',
+            'cityStatePincode',
+            'dob',
+            'gender',
+            'purposeOfStay',
+            'policeVerificationConsent',
+          ];
+          const isMandatory = mandatoryKeys.includes(f.key);
+          return { ...f, isEnabled: true, isRequired: isMandatory };
+        }
+
+        if (presetKey === 'HOSTEL_PG') {
+          // Hostel PG Inmate compliance
+          const mandatoryKeys = [
+            'fullName',
+            'phone',
+            'emergencyPhone',
+            'email',
+            'livePhotoUrl',
+            'idProofType',
+            'idProofNumber',
+            'idProofFrontUrl',
+            'address',
+            'permanentAddress',
+            'cityStatePincode',
+            'dob',
+            'gender',
+            'guardianName',
+            'guardianPhone',
+            'purposeOfStay',
+            'occupationWorkplace',
+            'policeVerificationConsent',
+          ];
+          const isMandatory = mandatoryKeys.includes(f.key);
+          return { ...f, isEnabled: true, isRequired: isMandatory };
+        }
+
+        if (presetKey === 'HOTEL_STANDARD') {
+          // Hotel standard guest register
+          const disabledKeys = ['guardianName', 'guardianPhone', 'occupationWorkplace', 'permanentAddress'];
+          if (disabledKeys.includes(f.key)) {
+            return { ...f, isEnabled: false, isRequired: false };
+          }
+          const mandatoryKeys = [
+            'fullName',
+            'phone',
+            'email',
+            'livePhotoUrl',
+            'idProofType',
+            'idProofNumber',
+            'address',
+            'cityStatePincode',
+            'purposeOfStay',
+            'policeVerificationConsent',
+          ];
+          return {
+            ...f,
+            isEnabled: true,
+            isRequired: mandatoryKeys.includes(f.key),
+          };
+        }
+
+        if (presetKey === 'FUNCTION_HALL') {
+          // Function hall event organizer
+          const disabledKeys = ['guardianName', 'guardianPhone', 'occupationWorkplace', 'permanentAddress'];
+          if (disabledKeys.includes(f.key)) {
+            return { ...f, isEnabled: false, isRequired: false };
+          }
+          const mandatoryKeys = [
+            'fullName',
+            'phone',
+            'emergencyPhone',
+            'email',
+            'idProofType',
+            'idProofNumber',
+            'address',
+            'cityStatePincode',
+            'purposeOfStay',
+            'guestsCountSplit',
+            'policeVerificationConsent',
+          ];
+          return {
+            ...f,
+            isEnabled: true,
+            isRequired: mandatoryKeys.includes(f.key),
+          };
+        }
+
+        return f;
+      })
+    );
+
+    addAuditLog({
+      actorName: currentUser.fullName,
+      actorRole: currentUser.role,
+      action: 'REGISTRATION_PRESET_APPLIED',
+      entityType: 'GOVERNANCE',
+      entityId: presetKey,
+      details: `${currentUser.role} applied Plug & Play preset "${presetKey}".`,
+      status: 'SUCCESS',
+    });
+  };
+
+  const addRegistrationField = (newFieldData: Omit<CustomerRegistrationField, 'id'>) => {
+    const newField: CustomerRegistrationField = {
+      ...newFieldData,
+      id: `crf_${Date.now()}`,
+    };
+    setCustomerRegistrationFields((prev) => [...prev, newField]);
+    addAuditLog({
+      actorName: currentUser.fullName,
+      actorRole: currentUser.role,
+      action: 'REGISTRATION_FIELD_CREATED',
+      entityType: 'GOVERNANCE',
+      entityId: newField.id,
+      details: `${currentUser.role} added new KYC field "${newField.label}".`,
+      status: 'SUCCESS',
+    });
+  };
+
+  const deleteRegistrationField = (id: string) => {
+    setCustomerRegistrationFields((prev) => prev.filter((f) => f.id !== id));
+    addAuditLog({
+      actorName: currentUser.fullName,
+      actorRole: currentUser.role,
+      action: 'REGISTRATION_FIELD_DELETED',
+      entityType: 'GOVERNANCE',
+      entityId: id,
+      details: `${currentUser.role} deleted KYC field ID "${id}".`,
+      status: 'SUCCESS',
+    });
+  };
+
+  const reorderRegistrationFields = (startIndex: number, endIndex: number) => {
+    setCustomerRegistrationFields((prev) => {
+      const result = Array.from(prev);
+      const [removed] = result.splice(startIndex, 1);
+      result.splice(endIndex, 0, removed);
+      return result.map((item, index) => ({
+        ...item,
+        displayOrder: index + 1,
+      }));
+    });
+  };
+
+  const duplicateRegistrationField = (id: string) => {
+    const original = customerRegistrationFields.find((f) => f.id === id);
+    if (!original) return;
+
+    const newField: CustomerRegistrationField = {
+      ...original,
+      id: `crf_${Date.now()}`,
+      key: `${original.key}_copy_${Math.floor(Math.random() * 1000)}`,
+      label: `${original.label} (Copy)`,
+      displayOrder: customerRegistrationFields.length + 1,
+    };
+
+    setCustomerRegistrationFields((prev) => [...prev, newField]);
+    addAuditLog({
+      actorName: currentUser.fullName,
+      actorRole: currentUser.role,
+      action: 'REGISTRATION_FIELD_DUPLICATED',
+      entityType: 'GOVERNANCE',
+      entityId: newField.id,
+      details: `${currentUser.role} duplicated field "${original.label}".`,
+      status: 'SUCCESS',
+    });
+  };
+
+  const resetRegistrationFields = () => {
+    setCustomerRegistrationFields(DEFAULT_CUSTOMER_REGISTRATION_FIELDS);
+    fetch('/api/registration-fields/reset', { method: 'POST' }).catch(() => {});
+  };
+
   // Helper for adding audit logs
   const addAuditLog = (entry: Omit<AuditLog, 'id' | 'timestamp'>) => {
     const newLog: AuditLog = {
@@ -227,9 +682,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       parkingCapacity: venueData.parkingCapacity || 50,
       foodOptions: venueData.foodOptions || 'External Catering Permitted',
       rules: venueData.rules || 'Standard rules apply. Sound permits until 10 PM.',
-      isVerified: false,
+      isVerified: venueData.isVerified !== undefined ? venueData.isVerified : (currentUser.role === 'ADMIN'),
       isActive: true,
-      status: 'PENDING', // Owner listings start as PENDING per Business Rules
+      status: venueData.status || (currentUser.role === 'ADMIN' ? 'APPROVED' : 'PENDING'),
       avgRating: 5.0,
       ratingCount: 1,
       category: venueData.category || SAMPLE_CATEGORIES[1],
@@ -241,6 +696,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           isCover: true,
         },
       ],
+      videos: venueData.videos || [],
       facilities: venueData.facilities || [
         { facility: 'Air Conditioning', isAvailable: true },
         { facility: 'Dedicated Parking', isAvailable: true },
@@ -367,6 +823,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       remainingBalanceDue: newBookingData.remainingBalanceDue || 0,
       customerNotes: newBookingData.customerNotes || '',
       isCheckedIn: false,
+      customerRegistration: newBookingData.customerRegistration,
     };
 
     setBookings((prev) => [createdBooking, ...prev]);
@@ -563,6 +1020,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setIsHelpChatOpen,
         isAIBookingOpen,
         setIsAIBookingOpen,
+        customerRegistrationFields,
+        updateRegistrationField,
+        toggleRegistrationFieldEnabled,
+        toggleRegistrationFieldRequired,
+        setRegistrationFieldRequirement,
+        batchSetRegistrationRequirement,
+        applyRegistrationPreset,
+        addRegistrationField,
+        deleteRegistrationField,
+        resetRegistrationFields,
+        reorderRegistrationFields,
+        duplicateRegistrationField,
+        dbSyncStatus,
+        lastDbSyncedAt,
+        saveFieldsToDatabase,
+        reloadFieldsFromDatabase,
+        registrationCardBooking,
+        setRegistrationCardBooking,
       }}
     >
       {children}

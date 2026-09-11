@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import {
   ArrowLeft,
@@ -17,6 +17,15 @@ import {
   Share2,
   AlertCircle,
   Sparkles,
+  Video,
+  Play,
+  Pause,
+  Volume2,
+  VolumeX,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  Film,
 } from 'lucide-react';
 import { SAMPLE_REVIEWS } from '../data/mockData';
 
@@ -38,6 +47,12 @@ export const VenueDetailScreen: React.FC = () => {
       SAMPLE_REVIEWS.slice(0, 1)
     )
   );
+
+  // Shorts / Reels Video Player Modal State
+  const [activeReelIndex, setActiveReelIndex] = useState<number | null>(null);
+  const [isReelMuted, setIsReelMuted] = useState<boolean>(true);
+  const [isReelPlaying, setIsReelPlaying] = useState<boolean>(true);
+  const reelVideoRef = useRef<HTMLVideoElement>(null);
 
   if (!venue) return null;
 
@@ -112,6 +127,19 @@ export const VenueDetailScreen: React.FC = () => {
               </span>
             )}
           </div>
+
+          {venue.videos && venue.videos.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setActiveReelIndex(0)}
+              className="absolute bottom-4 right-4 px-3.5 py-2 bg-black/80 hover:bg-black/95 backdrop-blur-md text-white text-xs font-bold rounded-full flex items-center gap-2 shadow-lg transition-transform active:scale-95 group ring-1 ring-white/20"
+            >
+              <div className="w-5 h-5 rounded-full bg-rose-600 flex items-center justify-center">
+                <Play className="w-2.5 h-2.5 fill-white text-white ml-0.5" />
+              </div>
+              <span>Watch Video Tour ({venue.videos.length} Reels)</span>
+            </button>
+          )}
         </div>
 
         {venue.images.length > 1 && (
@@ -166,6 +194,72 @@ export const VenueDetailScreen: React.FC = () => {
             <h3 className="text-sm font-bold text-slate-900">About this Space</h3>
             <p className="text-xs text-slate-600 leading-relaxed">{venue.description}</p>
           </div>
+
+          {/* Short Videos & Walkthrough Reels */}
+          {venue.videos && venue.videos.length > 0 && (
+            <div className="bg-white p-5 rounded-3xl border border-slate-200/90 space-y-3.5 shadow-2xs">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-rose-50 text-rose-600 rounded-xl">
+                    <Film className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900">Short Videos & Walkthrough Reels</h3>
+                    <p className="text-[11px] text-slate-500">Quick 15-60s immersive video clips of this venue</p>
+                  </div>
+                </div>
+                <span className="px-2.5 py-1 bg-rose-50 text-rose-700 text-xs font-black rounded-full">
+                  {venue.videos.length} {venue.videos.length === 1 ? 'Reel' : 'Reels'}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {venue.videos.map((vid, idx) => (
+                  <button
+                    key={vid.id}
+                    type="button"
+                    onClick={() => setActiveReelIndex(idx)}
+                    className="relative aspect-[9/14] rounded-2xl overflow-hidden group border border-slate-200 bg-slate-900 text-left shadow-xs transition-transform hover:-translate-y-1 focus:outline-hidden"
+                  >
+                    {/* Video preview / poster frame */}
+                    <video
+                      src={vid.url}
+                      muted
+                      preload="metadata"
+                      className="w-full h-full object-cover opacity-80 group-hover:opacity-95 group-hover:scale-105 transition-all duration-300"
+                    />
+
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-black/30 pointer-events-none" />
+
+                    {/* Duration Badge */}
+                    <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-xs text-white text-[10px] font-bold flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-rose-400" />
+                      <span>{vid.durationSeconds || 30}s</span>
+                    </div>
+
+                    {/* Center Play Button Pulse */}
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="w-11 h-11 rounded-full bg-rose-600/90 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                        <Play className="w-5 h-5 fill-white ml-0.5" />
+                      </div>
+                    </div>
+
+                    {/* Bottom Metadata */}
+                    <div className="absolute bottom-3 left-3 right-3 text-white pointer-events-none">
+                      <div className="text-[10px] font-black uppercase tracking-wider text-rose-400 mb-0.5 flex items-center gap-1">
+                        <Video className="w-3 h-3" />
+                        <span>Reel Walkthrough</span>
+                      </div>
+                      <div className="text-xs font-bold leading-snug line-clamp-2 drop-shadow-xs">
+                        {vid.title}
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Facilities & Amenities */}
           <div className="bg-white p-5 rounded-2xl border border-slate-200/90 space-y-3">
@@ -374,6 +468,134 @@ export const VenueDetailScreen: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Interactive Shorts & Reels Video Player Modal */}
+      {activeReelIndex !== null && venue.videos && venue.videos[activeReelIndex] && (
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200">
+          <div className="relative w-full max-w-sm sm:max-w-md h-[88vh] bg-slate-950 rounded-3xl overflow-hidden shadow-2xl flex flex-col justify-between border border-slate-800">
+            {/* Top Bar with Venue Info & Close */}
+            <div className="absolute top-0 inset-x-0 z-20 p-4 bg-gradient-to-b from-black/90 via-black/40 to-transparent flex items-center justify-between text-white">
+              <div className="min-w-0 pr-2">
+                <div className="text-[10px] font-extrabold uppercase text-rose-400 tracking-wider flex items-center gap-1">
+                  <Film className="w-3 h-3" />
+                  <span>Reel {activeReelIndex + 1} of {venue.videos.length}</span>
+                </div>
+                <h4 className="text-xs font-bold text-white truncate">{venue.name}</h4>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setIsReelMuted(!isReelMuted)}
+                  className="p-2 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-full text-white transition-colors"
+                  title={isReelMuted ? 'Unmute audio' : 'Mute audio'}
+                >
+                  {isReelMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveReelIndex(null)}
+                  className="p-2 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-full text-white transition-colors"
+                  title="Close Reel"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Video Canvas Container */}
+            <div
+              className="relative w-full h-full flex items-center justify-center bg-black cursor-pointer"
+              onClick={() => {
+                if (reelVideoRef.current) {
+                  if (reelVideoRef.current.paused) {
+                    reelVideoRef.current.play();
+                    setIsReelPlaying(true);
+                  } else {
+                    reelVideoRef.current.pause();
+                    setIsReelPlaying(false);
+                  }
+                }
+              }}
+            >
+              <video
+                ref={reelVideoRef}
+                src={venue.videos[activeReelIndex].url}
+                autoPlay
+                loop
+                playsInline
+                muted={isReelMuted}
+                onPlay={() => setIsReelPlaying(true)}
+                onPause={() => setIsReelPlaying(false)}
+                className="w-full h-full object-cover"
+              />
+
+              {!isReelPlaying && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/40 pointer-events-none">
+                  <div className="w-16 h-16 rounded-full bg-black/70 text-white flex items-center justify-center backdrop-blur-xs">
+                    <Play className="w-8 h-8 fill-white ml-1" />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Next / Prev Navigation Chevrons */}
+            {venue.videos.length > 1 && (
+              <>
+                {activeReelIndex > 0 && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveReelIndex(activeReelIndex - 1);
+                    }}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-black/50 hover:bg-black/80 text-white backdrop-blur-xs transition-colors"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                )}
+                {activeReelIndex < venue.videos.length - 1 && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveReelIndex(activeReelIndex + 1);
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-black/50 hover:bg-black/80 text-white backdrop-blur-xs transition-colors"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                )}
+              </>
+            )}
+
+            {/* Bottom Overlay with Caption & Book CTA */}
+            <div className="absolute bottom-0 inset-x-0 z-20 p-4 bg-gradient-to-t from-black/95 via-black/60 to-transparent text-white space-y-3">
+              <div>
+                <h3 className="text-sm font-bold drop-shadow-xs">{venue.videos[activeReelIndex].title}</h3>
+                <p className="text-[11px] text-slate-300 flex items-center gap-1.5 mt-0.5">
+                  <MapPin className="w-3 h-3 text-rose-400" />
+                  <span>{venue.addressLine1}, {venue.city}</span>
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveReelIndex(null);
+                    setBookingModalVenue(venue);
+                  }}
+                  className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-black rounded-xl shadow-lg transition-colors flex items-center justify-center gap-1.5"
+                >
+                  <Calendar className="w-4 h-4" />
+                  <span>Book This Space (₹{venue.pricingBaseAmount?.toLocaleString('en-IN')})</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

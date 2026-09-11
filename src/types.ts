@@ -31,6 +31,18 @@ export interface VenueImage {
   tag?: string;
 }
 
+export interface VenueVideo {
+  id: string;
+  url: string;
+  title: string;
+  thumbnailUrl?: string;
+  durationSeconds?: number;
+  aspectRatio?: '9:16' | '16:9';
+  isShort?: boolean;
+  viewsCount?: number;
+  uploadedAt?: string;
+}
+
 export interface VenueFacility {
   facility: string;
   isAvailable: boolean;
@@ -130,6 +142,7 @@ export interface Venue {
   ratingCount: number;
   category: VenueCategory;
   images: VenueImage[];
+  videos?: VenueVideo[];
   facilities: VenueFacility[];
   packages: VenuePackage[];
   addons: VenueAddon[];
@@ -192,6 +205,77 @@ export interface Booking {
   remainingBalanceDue?: number;
   cancellationReason?: string;
   refundAmount?: number;
+  customerRegistration?: CustomerRegistrationData;
+}
+
+export type RegistrationFieldCategoryScope =
+  | 'ALL'
+  | 'PG_HOSTEL'
+  | 'HOTEL'
+  | 'FUNCTION_HALL'
+  | 'RESORT'
+  | 'SPORTS_TURF';
+
+export type RegistrationFieldType =
+  | 'TEXT'
+  | 'PHONE'
+  | 'EMAIL'
+  | 'TEXTAREA'
+  | 'NUMBER'
+  | 'DROPDOWN'
+  | 'IMAGE_UPLOAD'
+  | 'LIVE_PHOTO'
+  | 'BOOLEAN'
+  | 'DATE'
+  | 'AADHAAR'
+  | 'FILE_UPLOAD';
+
+export interface CustomerRegistrationField {
+  id: string;
+  key: string;
+  label: string;
+  type: RegistrationFieldType;
+  isRequired: boolean;
+  isEnabled: boolean;
+  helpText?: string;
+  options?: string[];
+  placeholder?: string;
+  categoryScope: RegistrationFieldCategoryScope;
+  displayOrder: number;
+  venueId?: string; // Target specific venue if set, otherwise applies to all in category
+  venueName?: string;
+  defaultValue?: string | number | boolean;
+  fileAccept?: string;
+  minNumber?: number;
+  maxNumber?: number;
+}
+
+export interface CustomerRegistrationData {
+  fullName?: string;
+  phone?: string;
+  emergencyPhone?: string;
+  email?: string;
+  address?: string;
+  permanentAddress?: string;
+  cityStatePincode?: string;
+  idProofType?: string;
+  idProofNumber?: string;
+  idProofFrontUrl?: string;
+  idProofBackUrl?: string;
+  livePhotoUrl?: string;
+  dob?: string;
+  gender?: string;
+  guardianName?: string;
+  guardianPhone?: string;
+  purposeOfStay?: string;
+  occupationWorkplace?: string;
+  vehicleNumber?: string;
+  guestsCountSplit?: string;
+  stayDurationMonths?: string;
+  stayDuration?: string;
+  policeVerificationConsent?: boolean;
+  customFields?: Record<string, any>;
+  submittedAt?: string;
 }
 
 export interface ReviewItem {
@@ -269,6 +353,69 @@ export interface AppFeatureToggle {
   isEnabled: boolean;
 }
 
+export interface InstituteClass {
+  id: string;
+  instituteId: string;
+  instituteName: string;
+  title: string;
+  category: string;
+  subject: string;
+  batchTiming: string;
+  deliveryMode: 'OFFLINE' | 'ONLINE' | 'HYBRID';
+  totalSeats: number;
+  availableSeats: number;
+  monthlyFee: number;
+  facultyName: string;
+  facultyBio: string;
+  facultyExperience: string;
+  location: string;
+  isTodayOngoing: boolean;
+  isUpcomingBatch: boolean;
+  enrollmentOpen: boolean;
+  imageUrl: string;
+  rating: number;
+}
+
+export interface ConfirmedClassBooking {
+  id: string;
+  studentName: string;
+  studentPhone: string;
+  className: string;
+  instituteName: string;
+  timing: string;
+  amount: number;
+  status: 'CONFIRMED' | 'TRIAL_BOOKED';
+  date: string;
+}
+
+export interface McpToolDefinition {
+  name: string;
+  description: string;
+  parameters: Record<string, any>;
+  category: string;
+}
+
+export interface CustomSiteIntegration {
+  id: string;
+  siteName: string;
+  domain: string;
+  embedType: 'IFRAME' | 'POPUP_BUTTON' | 'DIRECT_LINK';
+  apiKey: string;
+  status: 'ACTIVE' | 'PENDING';
+}
+
+export interface PaymentTransactionRecord {
+  id: string;
+  bookingRef: string;
+  venueName: string;
+  guestName: string;
+  amount: number;
+  paymentMethod: 'UPI' | 'CARD' | 'NET_BANKING' | 'CASH';
+  status: 'CAPTURED' | 'REFUNDED' | 'FAILED' | 'RECONCILED';
+  timestamp: number;
+  utrOrRrn: string;
+}
+
 export type ActiveScreen =
   | 'home'
   | 'search'
@@ -277,9 +424,25 @@ export type ActiveScreen =
   | 'bookings'
   | 'saved'
   | 'events'
+  | 'institutes'
+  | 'institute-owner'
+  | 'create-venue'
+  | 'admin-venue-upload'
   | 'owner'
   | 'admin-audit'
   | 'admin-sections'
+  | 'admin-settings'
+  | 'admin-element-editor'
+  | 'admin-plug-play'
+  | 'listing-fields-config'
+  | 'registration-builder'
+  | 'tax-invoice-customizer'
+  | 'mcp-integrations'
+  | 'payment-health'
+  | 'theme-customizer'
+  | 'cloud-sync'
+  | 'unified-registration'
+  | 'referrals'
   | 'reports'
   | 'qr-scanner'
   | 'profile'

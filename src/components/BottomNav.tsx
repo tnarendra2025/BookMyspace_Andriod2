@@ -59,13 +59,13 @@ export const BottomNav: React.FC = () => {
       </button>
 
       <button
-        onClick={() => setActiveScreen('search')}
+        onClick={() => setActiveScreen('profile')}
         className={`flex flex-col items-center justify-center py-1.5 px-2 rounded-xl transition-all ${
-          activeScreen === 'search' ? 'text-indigo-600 font-bold' : 'text-slate-500 hover:text-slate-800'
+          activeScreen === 'profile' ? 'text-indigo-600 font-bold' : 'text-slate-500 hover:text-slate-800'
         }`}
       >
-        <Search className="w-5 h-5" />
-        <span className="text-[10px] tracking-tight mt-0.5">Search</span>
+        <User className="w-5 h-5" />
+        <span className="text-[10px] tracking-tight mt-0.5">Profile</span>
       </button>
     </nav>
   );

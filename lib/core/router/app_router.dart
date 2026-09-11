@@ -11,6 +11,7 @@ import '../../features/booking/presentation/screens/booking_screen.dart';
 import '../../features/booking/presentation/screens/my_bookings_screen.dart';
 import '../../features/courses/presentation/screens/course_detail_screen.dart';
 import '../../features/courses/presentation/screens/courses_list_screen.dart';
+import '../../features/debug/presentation/screens/debug_menu_screen.dart';
 import '../../features/events/presentation/screens/event_detail_screen.dart';
 import '../../features/events/presentation/screens/events_list_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
@@ -45,6 +46,7 @@ abstract class AppRoutes {
   static const saved = '/saved';
   static const profile = '/profile';
   static const settings = '/settings';
+  static const debug = '/debug';
   static const login = '/login';
   static const venueDetails = '/venues/:id';
   static const bookingFlow = '/venues/:id/book';
@@ -91,7 +93,30 @@ GoRouter createAppRouter({
       if (currentUser == null) {
         return isPublic ? null : AppRoutes.login;
       }
-      return isPublic ? AppRoutes.shell : null;
+      if (isPublic) {
+        return AppRoutes.shell;
+      }
+
+      // Role-based route gating (strictly based on authenticated user's role without hardcoding IDs)
+      final isAdminRoute =
+          location == AppRoutes.adminAudit || location.startsWith('/admin');
+      if (isAdminRoute && !currentUser.isAdmin) {
+        // Redirect unauthorized non-admin users to home
+        return AppRoutes.home;
+      }
+
+      final isOwnerRoute = location == AppRoutes.ownerDashboard ||
+          location == AppRoutes.ownerVenues ||
+          location == AppRoutes.ownerCategories ||
+          location == AppRoutes.ownerVenueCreate ||
+          (location.startsWith('/owner') &&
+              location != AppRoutes.ownerRegistration);
+      if (isOwnerRoute && !currentUser.isOwner) {
+        // Redirect unauthorized non-owner users to home
+        return AppRoutes.home;
+      }
+
+      return null;
     },
     routes: [
       GoRoute(
@@ -107,6 +132,11 @@ GoRouter createAppRouter({
         path: AppRoutes.settings,
         parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.debug,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const DebugMenuScreen(),
       ),
       GoRoute(
         path: AppRoutes.map,

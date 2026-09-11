@@ -12,6 +12,7 @@ import {
   CheckCircle2,
   XCircle,
   ArrowRight,
+  FileText,
 } from 'lucide-react';
 import { Booking, BookingStatus } from '../types';
 
@@ -24,6 +25,7 @@ export const MyBookingsScreen: React.FC = () => {
     setActiveScreen,
     setBookingModalVenue,
     venues,
+    setRegistrationCardBooking,
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'UPCOMING' | 'COMPLETED' | 'CANCELLED'>('UPCOMING');
@@ -161,6 +163,14 @@ export const MyBookingsScreen: React.FC = () => {
                     >
                       <QrCode className="w-3.5 h-3.5" />
                       Show QR Pass
+                    </button>
+                    <button
+                      onClick={() => setRegistrationCardBooking(b)}
+                      className="px-3 py-1.5 border border-indigo-200 bg-indigo-50/70 text-indigo-900 hover:bg-indigo-100 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+                      title="View Government KYC & Verification Card"
+                    >
+                      <FileText className="w-3.5 h-3.5 text-indigo-600" />
+                      Guest KYC Card
                     </button>
                     <button
                       onClick={() => setInvoiceModalBooking(b)}

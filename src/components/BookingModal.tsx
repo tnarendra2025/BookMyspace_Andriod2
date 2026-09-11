@@ -10,14 +10,17 @@ import {
   CheckCircle2,
   Tag,
   AlertCircle,
-  Sparkles,
   Receipt,
   QrCode,
   ArrowRight,
-  Info,
+  ArrowLeft,
+  FileText,
+  UserCheck,
+  Edit3,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { TimeSlot, VenuePackage, VenueAddon } from '../types';
+import { TimeSlot, VenuePackage, CustomerRegistrationData } from '../types';
+import { CustomerRegistrationForm } from './CustomerRegistrationForm';
 
 export const BookingModal: React.FC = () => {
   const {
@@ -27,6 +30,9 @@ export const BookingModal: React.FC = () => {
     setInvoiceModalBooking,
     setQrModalBooking,
     setActiveScreen,
+    currentUser,
+    customerRegistrationFields,
+    setRegistrationCardBooking,
   } = useApp();
 
   const venue = bookingModalVenue;
@@ -44,26 +50,31 @@ export const BookingModal: React.FC = () => {
   const [isAdvanceSplit, setIsAdvanceSplit] = useState<boolean>(false);
   const [customerNotes, setCustomerNotes] = useState<string>('');
 
-  // Step state (1: Select Details, 2: Review & Price Quote, 3: Processing, 4: Success)
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  // Customer Registration & KYC Form State
+  const [customerRegData, setCustomerRegData] = useState<CustomerRegistrationData>({
+    fullName: '',
+    phone: '',
+    email: '',
+    policeVerificationConsent: true,
+  });
+
+  // Step state (1: Schedule Details, 2: Customer Registration & KYC, 3: Review & Payment, 4: Processing, 5: Confirmed)
+  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
   const [confirmedBookingResult, setConfirmedBookingResult] = useState<any>(null);
 
-  // Hold Timer (10-minute hold countdown simulation)
-  const [holdSecondsLeft, setHoldSecondsLeft] = useState<number>(600); // 10 minutes
+  // Hold Timer (10-minute slot hold countdown)
+  const [holdSecondsLeft, setHoldSecondsLeft] = useState<number>(600);
 
   // Default values initialization
   useEffect(() => {
     if (venue) {
-      // Default to tomorrow's date
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
       setSelectedDate(tomorrow.toISOString().split('T')[0]);
 
-      // Default slot
       const firstAvail = venue.timeSlots.find((s) => s.isAvailable) || venue.timeSlots[0] || null;
       setSelectedSlot(firstAvail);
 
-      // Default package
       if (venue.packages.length > 0) {
         setSelectedPackage(venue.packages[0]);
       } else {
@@ -78,13 +89,33 @@ export const BookingModal: React.FC = () => {
       setStep(1);
       setHoldSecondsLeft(600);
       setConfirmedBookingResult(null);
-    }
-  }, [venue]);
 
-  // Countdown timer for step 2 (Hold active)
+      // Initialize Customer Registration with user profile info
+      setCustomerRegData({
+        fullName: currentUser.fullName || '',
+        phone: currentUser.phone || '+91 98765 43210',
+        email: currentUser.email || '',
+        emergencyPhone: '+91 98480 12345',
+        address: 'Plot 42, Silicon Valley Colony, Near DLF Cybercity',
+        permanentAddress: 'D.No 4-18, Trunk Road, Near RTC Complex, Ongole, AP 523001',
+        cityStatePincode: `${venue.city}, ${venue.state} - 500081`,
+        idProofType: 'Aadhaar Card (UIDAI)',
+        idProofNumber: '5412 8923 7610',
+        purposeOfStay:
+          venue.category.slug === 'pg_hostel'
+            ? 'PG / Hostel IT & Job Stay'
+            : venue.category.slug === 'function_hall'
+            ? 'Wedding & Marriage Ceremony'
+            : 'Hotel Room Transit / Vacation',
+        policeVerificationConsent: true,
+      });
+    }
+  }, [venue, currentUser]);
+
+  // Countdown timer for step 3 (Hold active)
   useEffect(() => {
     let interval: any;
-    if (step === 2 && holdSecondsLeft > 0) {
+    if (step === 3 && holdSecondsLeft > 0) {
       interval = setInterval(() => {
         setHoldSecondsLeft((prev) => (prev > 0 ? prev - 1 : 0));
       }, 1000);
@@ -94,7 +125,31 @@ export const BookingModal: React.FC = () => {
 
   if (!venue) return null;
 
-  // Price Calculation Engine (Strictly Authoritative)
+  // Filter applicable fields for current venue category
+  const isHostelPg = venue.category.slug === 'pg_hostel' || venue.category.slug === 'hourly_rooms';
+  const isHotel = venue.category.slug === 'hotel_stay' || venue.category.slug === 'hourly_rooms';
+  const isFunctionHall =
+    venue.category.slug === 'function_hall' ||
+    venue.category.slug === 'marriage_hall' ||
+    venue.category.slug === 'banquet_hall';
+
+  const applicableFields = customerRegistrationFields.filter((f) => {
+    if (!f.isEnabled) return false;
+    if (f.categoryScope === 'ALL') return true;
+    if (f.categoryScope === 'PG_HOSTEL' && isHostelPg) return true;
+    if (f.categoryScope === 'HOTEL' && isHotel) return true;
+    if (f.categoryScope === 'FUNCTION_HALL' && isFunctionHall) return true;
+    return false;
+  });
+
+  const mandatoryFields = applicableFields.filter((f) => f.isRequired);
+  const isRegistrationFormValid = mandatoryFields.every((f) => {
+    const val = (customerRegData as any)[f.key];
+    if (f.type === 'BOOLEAN') return Boolean(val);
+    return val !== undefined && val !== null && String(val).trim().length > 0;
+  });
+
+  // Price Calculation Engine
   const slotBase = selectedSlot?.priceAmount || venue.pricingBaseAmount;
   const packagePrice = selectedPackage?.priceAmount || 0;
   const addonsTotal = selectedAddonIds.reduce((sum, id) => {
@@ -107,8 +162,6 @@ export const BookingModal: React.FC = () => {
   const platformFee = subtotal > 50000 ? 999 : subtotal > 5000 ? 199 : 49;
   const grossTotal = subtotal + taxAmount + platformFee;
   const netTotal = Math.max(0, grossTotal - couponDiscount);
-
-  // Advance calculation (25% token)
   const advanceAmount = Math.round(netTotal * 0.25);
   const remainingDue = netTotal - advanceAmount;
 
@@ -128,14 +181,19 @@ export const BookingModal: React.FC = () => {
     }
   };
 
-  const handleProceedToHold = () => {
+  const handleProceedToRegistration = () => {
     if (!selectedSlot) return;
     setStep(2);
+  };
+
+  const handleProceedToPayment = () => {
+    if (!isRegistrationFormValid) return;
+    setStep(3);
     setHoldSecondsLeft(600);
   };
 
   const handleExecutePayment = () => {
-    setStep(3); // Processing payment simulation
+    setStep(4); // Processing payment
 
     setTimeout(() => {
       const newBooking = createBooking({
@@ -154,25 +212,28 @@ export const BookingModal: React.FC = () => {
         totalAmount: isAdvanceSplit ? advanceAmount : netTotal,
         guestCount,
         packageName: selectedPackage?.name,
-        paymentMethod: `${paymentMethod} (Razorpay Test Mode)`,
+        paymentMethod: `${paymentMethod} (Razorpay Sandbox)`,
         isAdvancePayment: isAdvanceSplit,
         advanceAmountPaid: isAdvanceSplit ? advanceAmount : netTotal,
         remainingBalanceDue: isAdvanceSplit ? remainingDue : 0,
         customerNotes,
+        customerRegistration: {
+          ...customerRegData,
+          submittedAt: new Date().toISOString(),
+        },
       });
 
       setConfirmedBookingResult(newBooking);
-      setStep(4);
+      setStep(5);
 
-      // Trigger celebration confetti
       try {
         confetti({
-          particleCount: 80,
-          spread: 70,
+          particleCount: 90,
+          spread: 80,
           origin: { y: 0.6 },
         });
       } catch (e) {}
-    }, 1400);
+    }, 1300);
   };
 
   const formatTimer = (seconds: number) => {
@@ -183,18 +244,18 @@ export const BookingModal: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
-      <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
         {/* Header */}
-        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+        <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/80">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800">
+              <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800">
                 {venue.category.name}
               </span>
               <span className="text-xs text-slate-400">•</span>
               <span className="text-xs text-slate-500 font-medium">{venue.city}</span>
             </div>
-            <h2 className="text-base sm:text-lg font-bold text-slate-900 truncate max-w-md mt-0.5">
+            <h2 className="text-base sm:text-lg font-black text-slate-900 truncate max-w-md mt-0.5">
               {venue.name}
             </h2>
           </div>
@@ -205,6 +266,54 @@ export const BookingModal: React.FC = () => {
             <X className="w-5 h-5" />
           </button>
         </div>
+
+        {/* Step Progress Indicator Bar */}
+        {step <= 3 && (
+          <div className="px-5 py-2.5 bg-slate-100/60 border-b border-slate-200/70 flex items-center justify-between text-xs">
+            <div className="flex items-center gap-2">
+              <span
+                className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs ${
+                  step >= 1 ? 'bg-indigo-600 text-white shadow-xs' : 'bg-slate-200 text-slate-600'
+                }`}
+              >
+                1
+              </span>
+              <span className={`font-semibold ${step === 1 ? 'text-indigo-900 font-bold' : 'text-slate-500'}`}>
+                Schedule & Addons
+              </span>
+            </div>
+
+            <div className="h-0.5 w-6 bg-slate-200" />
+
+            <div className="flex items-center gap-2">
+              <span
+                className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs ${
+                  step >= 2 ? 'bg-indigo-600 text-white shadow-xs' : 'bg-slate-200 text-slate-600'
+                }`}
+              >
+                2
+              </span>
+              <span className={`font-semibold ${step === 2 ? 'text-indigo-900 font-bold' : 'text-slate-500'}`}>
+                Guest KYC & Photo
+              </span>
+            </div>
+
+            <div className="h-0.5 w-6 bg-slate-200" />
+
+            <div className="flex items-center gap-2">
+              <span
+                className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs ${
+                  step >= 3 ? 'bg-indigo-600 text-white shadow-xs' : 'bg-slate-200 text-slate-600'
+                }`}
+              >
+                3
+              </span>
+              <span className={`font-semibold ${step === 3 ? 'text-indigo-900 font-bold' : 'text-slate-500'}`}>
+                Review & Pay
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Modal Body */}
         <div className="p-5 overflow-y-auto space-y-5 flex-1">
@@ -230,7 +339,7 @@ export const BookingModal: React.FC = () => {
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
                     <Users className="w-3.5 h-3.5 text-indigo-600" />
-                    Number of Guests / Players
+                    Number of Guests / Inmates
                   </label>
                   <input
                     type="number"
@@ -240,20 +349,19 @@ export const BookingModal: React.FC = () => {
                     onChange={(e) => setGuestCount(Math.max(1, parseInt(e.target.value) || 1))}
                     className="w-full text-xs font-medium px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 focus:bg-white focus:outline-hidden transition-all"
                   />
+                  <div className="text-[10px] text-slate-400 mt-1">
+                    Venue capacity: {venue.minGuests || 1} - {venue.maxGuests || venue.capacity}
+                  </div>
                 </div>
               </div>
 
-              {/* Time Slots */}
+              {/* Time Slots Selector */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-2 flex items-center justify-between">
-                  <span className="flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-indigo-600" />
-                    Select Time Slot
-                  </span>
-                  <span className="text-[11px] font-normal text-emerald-600">● Live Inventory Check</span>
+                <label className="block text-xs font-bold text-slate-700 mb-2 flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-indigo-600" />
+                  Select Time Slot / Shift
                 </label>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   {venue.timeSlots.map((slot) => {
                     const isSelected = selectedSlot?.id === slot.id;
                     return (
@@ -262,25 +370,23 @@ export const BookingModal: React.FC = () => {
                         type="button"
                         disabled={!slot.isAvailable}
                         onClick={() => setSelectedSlot(slot)}
-                        className={`text-left p-3 rounded-xl border text-xs transition-all flex flex-col justify-between ${
+                        className={`p-3 rounded-xl border text-left transition-all relative ${
                           !slot.isAvailable
-                            ? 'bg-slate-50 border-slate-200 opacity-50 cursor-not-allowed'
+                            ? 'opacity-40 bg-slate-100 border-slate-200 cursor-not-allowed'
                             : isSelected
-                            ? 'bg-indigo-50/80 border-indigo-600 text-indigo-950 font-medium ring-1 ring-indigo-500'
-                            : 'bg-white border-slate-200 hover:border-slate-300 text-slate-800'
+                            ? 'bg-indigo-50/80 border-indigo-600 ring-2 ring-indigo-600/20 shadow-xs'
+                            : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
                         }`}
                       >
-                        <div className="font-bold flex items-center justify-between">
-                          <span>{slot.label}</span>
-                          {!slot.isAvailable && (
-                            <span className="text-[10px] text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded font-bold">
-                              Booked
-                            </span>
-                          )}
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs font-bold text-slate-900">{slot.label}</span>
+                          {isSelected && <CheckCircle2 className="w-4 h-4 text-indigo-600 shrink-0" />}
                         </div>
-                        <div className="text-[11px] text-slate-500 mt-1 flex items-center justify-between">
-                          <span>{slot.startTime} - {slot.endTime}</span>
-                          <span className="font-bold text-indigo-600">₹{slot.priceAmount.toLocaleString('en-IN')}</span>
+                        <div className="text-[11px] text-slate-500">
+                          {slot.startTime} - {slot.endTime}
+                        </div>
+                        <div className="text-xs font-extrabold text-indigo-700 mt-1.5">
+                          ₹{slot.priceAmount.toLocaleString('en-IN')}
                         </div>
                       </button>
                     );
@@ -288,31 +394,42 @@ export const BookingModal: React.FC = () => {
                 </div>
               </div>
 
-              {/* Packages (if any) */}
+              {/* Packages (if venue offers tiered packages) */}
               {venue.packages.length > 0 && (
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-2 flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                    Select Curated Package (Optional)
+                  <label className="block text-xs font-bold text-slate-700 mb-2">
+                    Select Event / Stay Package
                   </label>
-                  <div className="space-y-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     {venue.packages.map((pkg) => {
                       const isSelected = selectedPackage?.id === pkg.id;
                       return (
                         <div
                           key={pkg.id}
                           onClick={() => setSelectedPackage(isSelected ? null : pkg)}
-                          className={`p-3 rounded-xl border text-xs cursor-pointer transition-all ${
+                          className={`p-3 rounded-xl border cursor-pointer transition-all ${
                             isSelected
-                              ? 'bg-amber-50/70 border-amber-500 text-amber-950 ring-1 ring-amber-400'
-                              : 'bg-white border-slate-200 hover:border-slate-300 text-slate-800'
+                              ? 'bg-indigo-50/70 border-indigo-500 ring-1 ring-indigo-500'
+                              : 'border-slate-200 bg-white hover:bg-slate-50'
                           }`}
                         >
-                          <div className="flex items-center justify-between font-bold">
-                            <span>{pkg.name}</span>
-                            <span className="text-amber-700">₹{pkg.priceAmount.toLocaleString('en-IN')}</span>
+                          <div className="flex justify-between items-start mb-1">
+                            <h4 className="text-xs font-bold text-slate-900">{pkg.name}</h4>
+                            <span className="text-xs font-bold text-indigo-600">
+                              +₹{pkg.priceAmount.toLocaleString('en-IN')}
+                            </span>
                           </div>
-                          <p className="text-[11px] text-slate-500 mt-1">{pkg.description}</p>
+                          <p className="text-[11px] text-slate-500 leading-snug">{pkg.description}</p>
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {(pkg.itemsIncluded || []).map((inc, i) => (
+                              <span
+                                key={i}
+                                className="text-[10px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded font-medium"
+                              >
+                                ✓ {inc}
+                              </span>
+                            ))}
+                          </div>
                         </div>
                       );
                     })}
@@ -333,7 +450,9 @@ export const BookingModal: React.FC = () => {
                         <label
                           key={add.id}
                           className={`flex items-start gap-2.5 p-2.5 rounded-xl border text-xs cursor-pointer transition-all ${
-                            isChecked ? 'bg-indigo-50 border-indigo-500 text-indigo-900 font-medium' : 'border-slate-200 bg-white hover:bg-slate-50'
+                            isChecked
+                              ? 'bg-indigo-50 border-indigo-500 text-indigo-900 font-medium'
+                              : 'border-slate-200 bg-white hover:bg-slate-50'
                           }`}
                         >
                           <input
@@ -350,7 +469,9 @@ export const BookingModal: React.FC = () => {
                           />
                           <div>
                             <div className="font-semibold">{add.name}</div>
-                            <div className="text-[10px] text-slate-500">₹{add.priceAmount.toLocaleString('en-IN')}</div>
+                            <div className="text-[10px] text-slate-500">
+                              ₹{add.priceAmount.toLocaleString('en-IN')}
+                            </div>
                           </div>
                         </label>
                       );
@@ -368,22 +489,34 @@ export const BookingModal: React.FC = () => {
                   rows={2}
                   value={customerNotes}
                   onChange={(e) => setCustomerNotes(e.target.value)}
-                  placeholder="e.g. Dietary catering requirements, extra chairs, VIP valet instructions..."
+                  placeholder="e.g. Early luggage drop, quiet floor preference, dietary catering requirements..."
                   className="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 focus:bg-white focus:outline-hidden"
                 />
               </div>
             </div>
           )}
 
-          {/* STEP 2: Review Quote, Temporary Hold & Payment Selection */}
+          {/* STEP 2: Customer Registration & KYC Form */}
           {step === 2 && (
             <div className="space-y-4">
+              <CustomerRegistrationForm
+                categorySlug={venue.category.slug}
+                fields={customerRegistrationFields}
+                formData={customerRegData}
+                onChange={setCustomerRegData}
+              />
+            </div>
+          )}
+
+          {/* STEP 3: Review Quote, Temporary Hold & Payment Selection */}
+          {step === 3 && (
+            <div className="space-y-4">
               {/* Concurrency Hold Banner */}
-              <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between text-xs text-amber-900">
+              <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-2xl flex items-center justify-between text-xs text-amber-900">
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-amber-600 animate-pulse" />
                   <div>
-                    <span className="font-bold">Temporary Slot Hold Active:</span> Slot locked for you.
+                    <span className="font-bold">Temporary Slot Hold Active:</span> Slot reserved for you.
                   </div>
                 </div>
                 <div className="font-mono font-bold text-sm bg-amber-200/70 px-2.5 py-1 rounded-lg text-amber-900">
@@ -391,8 +524,47 @@ export const BookingModal: React.FC = () => {
                 </div>
               </div>
 
+              {/* Customer Registration Verification Preview Card */}
+              <div className="p-3.5 bg-indigo-50/70 border border-indigo-200 rounded-2xl flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  {customerRegData.livePhotoUrl ? (
+                    <img
+                      src={customerRegData.livePhotoUrl}
+                      alt="Guest photo"
+                      className="w-12 h-12 rounded-xl object-cover border-2 border-emerald-500 shrink-0 shadow-2xs"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-xl bg-indigo-200 flex items-center justify-center text-indigo-700 shrink-0">
+                      <UserCheck className="w-6 h-6" />
+                    </div>
+                  )}
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-extrabold text-slate-900">
+                        {customerRegData.fullName || 'Registered Guest'}
+                      </span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3" /> KYC Verified
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-slate-600 mt-0.5">
+                      {customerRegData.idProofType || 'Aadhaar Card'}: <strong className="font-mono text-slate-800">{customerRegData.idProofNumber || '•••• 7610'}</strong>
+                      {customerRegData.phone && ` • ${customerRegData.phone}`}
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setStep(2)}
+                  className="px-2.5 py-1.5 bg-white hover:bg-slate-100 text-indigo-600 text-xs font-bold rounded-xl border border-slate-200 flex items-center gap-1 shrink-0 transition-colors shadow-2xs"
+                >
+                  <Edit3 className="w-3.5 h-3.5" /> Edit Form
+                </button>
+              </div>
+
               {/* Itemized Price Quote Card */}
-              <div className="bg-slate-50 rounded-xl p-4 border border-slate-200/80 space-y-2.5 text-xs text-slate-700">
+              <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200/80 space-y-2.5 text-xs text-slate-700">
                 <div className="font-bold text-slate-900 border-b border-slate-200 pb-2 flex items-center justify-between">
                   <span>Authoritative Price Breakdown</span>
                   <span className="text-[11px] text-emerald-600 font-semibold">Verified by Server</span>
@@ -406,7 +578,9 @@ export const BookingModal: React.FC = () => {
                 {selectedPackage && (
                   <div className="flex justify-between">
                     <span>Package ({selectedPackage.name}):</span>
-                    <span className="font-medium text-slate-900">₹{selectedPackage.priceAmount.toLocaleString('en-IN')}</span>
+                    <span className="font-medium text-slate-900">
+                      ₹{selectedPackage.priceAmount.toLocaleString('en-IN')}
+                    </span>
                   </div>
                 )}
 
@@ -418,56 +592,63 @@ export const BookingModal: React.FC = () => {
                 )}
 
                 <div className="flex justify-between">
-                  <span>Applicable GST (CGST 9% + SGST 9%):</span>
+                  <span>Goods & Services Tax (GST {venue.taxRate}%):</span>
                   <span className="font-medium text-slate-900">₹{taxAmount.toLocaleString('en-IN')}</span>
                 </div>
 
                 <div className="flex justify-between">
-                  <span>Platform Convenience & Safety Fee:</span>
+                  <span>Platform & Safety Guarantee Fee:</span>
                   <span className="font-medium text-slate-900">₹{platformFee}</span>
                 </div>
 
                 {couponDiscount > 0 && (
                   <div className="flex justify-between text-emerald-700 font-semibold">
-                    <span>Promo Discount:</span>
+                    <span>Discount Coupon ({couponCode}):</span>
                     <span>-₹{couponDiscount.toLocaleString('en-IN')}</span>
                   </div>
                 )}
 
-                <div className="border-t border-slate-200 pt-2.5 flex justify-between text-sm font-extrabold text-slate-900">
-                  <span>Total Amount Due:</span>
-                  <span className="text-indigo-600 text-base">₹{netTotal.toLocaleString('en-IN')}</span>
+                <div className="pt-2 border-t border-slate-200 flex justify-between text-sm font-extrabold text-slate-900">
+                  <span>Total Payable:</span>
+                  <span className="text-indigo-700 font-black">₹{netTotal.toLocaleString('en-IN')}</span>
                 </div>
               </div>
 
-              {/* Promo Coupon Input */}
+              {/* Coupon Code Input */}
               <div className="flex gap-2">
                 <div className="relative flex-1">
-                  <Tag className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <Tag className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3" />
                   <input
                     type="text"
+                    placeholder="Enter Coupon (e.g. BMS2026, WELCOME)"
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value)}
-                    placeholder="Enter coupon (e.g. BMS2026)"
-                    className="w-full text-xs pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 uppercase font-semibold"
+                    className="w-full text-xs pl-8 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl uppercase font-semibold text-slate-900"
                   />
                 </div>
                 <button
                   type="button"
                   onClick={handleApplyCoupon}
-                  className="px-4 py-2 bg-slate-800 text-white rounded-xl text-xs font-bold hover:bg-slate-900 transition-colors"
+                  className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-colors"
                 >
                   Apply
                 </button>
               </div>
+
               {couponMessage && (
-                <div className={`text-[11px] font-medium ${couponDiscount > 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                <div
+                  className={`text-xs p-2.5 rounded-xl ${
+                    couponDiscount > 0
+                      ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                      : 'bg-rose-50 text-rose-800 border border-rose-200'
+                  }`}
+                >
                   {couponMessage}
                 </div>
               )}
 
-              {/* Split Advance Option for Large Bookings */}
-              {netTotal >= 20000 && (
+              {/* Advance Payment Split Option */}
+              {netTotal >= 10000 && (
                 <div className="p-3 bg-indigo-50/60 border border-indigo-200 rounded-xl">
                   <label className="flex items-start gap-2 text-xs text-indigo-950 font-medium cursor-pointer">
                     <input
@@ -477,9 +658,12 @@ export const BookingModal: React.FC = () => {
                       className="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500"
                     />
                     <div>
-                      <span className="font-bold">Pay 25% Token Advance Now (₹{advanceAmount.toLocaleString('en-IN')})</span>
+                      <span className="font-bold">
+                        Pay 25% Token Advance Now (₹{advanceAmount.toLocaleString('en-IN')})
+                      </span>
                       <p className="text-[11px] text-slate-600 mt-0.5">
-                        Pay ₹{advanceAmount.toLocaleString('en-IN')} today to confirm hold; balance ₹{remainingDue.toLocaleString('en-IN')} payable directly at the venue on arrival.
+                        Pay ₹{advanceAmount.toLocaleString('en-IN')} today to confirm hold; balance ₹
+                        {remainingDue.toLocaleString('en-IN')} payable directly at the venue upon check-in.
                       </p>
                     </div>
                   </label>
@@ -520,21 +704,21 @@ export const BookingModal: React.FC = () => {
             </div>
           )}
 
-          {/* STEP 3: Processing */}
-          {step === 3 && (
+          {/* STEP 4: Processing */}
+          {step === 4 && (
             <div className="py-12 flex flex-col items-center justify-center text-center space-y-4">
               <div className="w-14 h-14 rounded-full border-4 border-indigo-200 border-t-indigo-600 animate-spin"></div>
               <div>
-                <h3 className="text-base font-bold text-slate-900">Securing Your Reservation...</h3>
+                <h3 className="text-base font-bold text-slate-900">Securing Your Reservation & KYC...</h3>
                 <p className="text-xs text-slate-500 mt-1">
-                  Verifying atomic inventory lock & generating digital check-in token
+                  Verifying Aadhaar snapshot, recording police consent & generating digital check-in pass
                 </p>
               </div>
             </div>
           )}
 
-          {/* STEP 4: Success Confirmed */}
-          {step === 4 && confirmedBookingResult && (
+          {/* STEP 5: Success Confirmed */}
+          {step === 5 && confirmedBookingResult && (
             <div className="py-6 flex flex-col items-center justify-center text-center space-y-4">
               <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
                 <CheckCircle2 className="w-10 h-10" />
@@ -542,9 +726,9 @@ export const BookingModal: React.FC = () => {
 
               <div>
                 <span className="text-xs font-bold text-emerald-700 uppercase tracking-widest bg-emerald-50 px-2.5 py-1 rounded-full">
-                  Booking Confirmed
+                  Booking & Registration Confirmed
                 </span>
-                <h3 className="text-xl font-extrabold text-slate-900 mt-2">
+                <h3 className="text-xl font-black text-slate-900 mt-2">
                   You're all set for {confirmedBookingResult.venueName}!
                 </h3>
                 <p className="text-xs text-slate-500 mt-1 font-mono">
@@ -552,9 +736,21 @@ export const BookingModal: React.FC = () => {
                 </p>
               </div>
 
-              <div className="w-full bg-slate-50 p-4 rounded-xl border border-slate-200/80 text-xs text-slate-700 space-y-2 text-left">
+              <div className="w-full bg-slate-50 p-4 rounded-2xl border border-slate-200/80 text-xs text-slate-700 space-y-2 text-left">
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Date & Time:</span>
+                  <span className="text-slate-500">Registered Guest:</span>
+                  <span className="font-bold text-slate-900">
+                    {confirmedBookingResult.customerRegistration?.fullName || confirmedBookingResult.userName}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Aadhaar / ID:</span>
+                  <span className="font-mono font-bold text-slate-800">
+                    {confirmedBookingResult.customerRegistration?.idProofNumber || 'Verified'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Date & Slot:</span>
                   <span className="font-bold text-slate-900">
                     {confirmedBookingResult.date} ({confirmedBookingResult.slotLabel})
                   </span>
@@ -566,23 +762,35 @@ export const BookingModal: React.FC = () => {
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Check-in QR Token:</span>
+                  <span className="text-slate-500">Digital Entry QR:</span>
                   <span className="font-mono font-bold text-indigo-700">
                     {confirmedBookingResult.qrCodeToken}
                   </span>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full pt-2">
+              {/* Action Buttons */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 w-full pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRegistrationCardBooking(confirmedBookingResult);
+                  }}
+                  className="w-full py-2.5 px-3 rounded-xl border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-900 text-xs font-bold transition-colors flex items-center justify-center gap-1.5"
+                >
+                  <FileText className="w-4 h-4 text-indigo-600" />
+                  View Guest KYC Card
+                </button>
+
                 <button
                   type="button"
                   onClick={() => {
                     setInvoiceModalBooking(confirmedBookingResult);
                   }}
-                  className="w-full py-2.5 px-4 rounded-xl border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-100 transition-colors flex items-center justify-center gap-2"
+                  className="w-full py-2.5 px-3 rounded-xl border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-100 transition-colors flex items-center justify-center gap-1.5"
                 >
                   <Receipt className="w-4 h-4 text-indigo-600" />
-                  View Tax Invoice
+                  Tax Invoice
                 </button>
 
                 <button
@@ -590,7 +798,7 @@ export const BookingModal: React.FC = () => {
                   onClick={() => {
                     setQrModalBooking(confirmedBookingResult);
                   }}
-                  className="w-full py-2.5 px-4 rounded-xl bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2 shadow-md shadow-indigo-500/20"
+                  className="w-full py-2.5 px-3 rounded-xl bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700 transition-colors flex items-center justify-center gap-1.5 shadow-md shadow-indigo-500/20"
                 >
                   <QrCode className="w-4 h-4" />
                   Show QR Pass
@@ -600,7 +808,7 @@ export const BookingModal: React.FC = () => {
           )}
         </div>
 
-        {/* Modal Footer */}
+        {/* Modal Footer Controls */}
         <div className="p-4 border-t border-slate-100 bg-slate-50/70 flex items-center justify-between">
           {step === 1 && (
             <>
@@ -613,10 +821,10 @@ export const BookingModal: React.FC = () => {
               <button
                 type="button"
                 disabled={!selectedSlot}
-                onClick={handleProceedToHold}
+                onClick={handleProceedToRegistration}
                 className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow-md shadow-indigo-500/20 flex items-center gap-2 transition-all"
               >
-                Continue to Hold & Pay
+                Proceed to Guest Registration
                 <ArrowRight className="w-4 h-4" />
               </button>
             </>
@@ -627,9 +835,37 @@ export const BookingModal: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setStep(1)}
-                className="text-xs font-semibold text-slate-600 hover:text-slate-900"
+                className="text-xs font-semibold text-slate-600 hover:text-slate-900 flex items-center gap-1"
               >
-                ← Back
+                <ArrowLeft className="w-4 h-4" /> Back to Schedule
+              </button>
+              <div className="flex items-center gap-2">
+                {!isRegistrationFormValid && (
+                  <span className="text-[11px] text-amber-700 hidden sm:inline">
+                    Please fill mandatory KYC fields
+                  </span>
+                )}
+                <button
+                  type="button"
+                  disabled={!isRegistrationFormValid}
+                  onClick={handleProceedToPayment}
+                  className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs rounded-xl shadow-md shadow-indigo-500/20 flex items-center gap-2 transition-all"
+                >
+                  Continue to Hold & Pay
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </>
+          )}
+
+          {step === 3 && (
+            <>
+              <button
+                type="button"
+                onClick={() => setStep(2)}
+                className="text-xs font-semibold text-slate-600 hover:text-slate-900 flex items-center gap-1"
+              >
+                <ArrowLeft className="w-4 h-4" /> Edit Registration
               </button>
               <button
                 type="button"
@@ -642,7 +878,7 @@ export const BookingModal: React.FC = () => {
             </>
           )}
 
-          {step === 4 && (
+          {step === 5 && (
             <div className="w-full flex justify-end">
               <button
                 type="button"

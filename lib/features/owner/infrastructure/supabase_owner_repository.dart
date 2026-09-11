@@ -62,27 +62,36 @@ class SupabaseOwnerRepository implements OwnerRepository {
         return Owner.fromJson(response);
       }
 
-      // Check if user has owner role in metadata
-      final role = user.userMetadata?['role'] as String?;
-      if (role == 'owner' || user.email != null) {
+      // Check if user has owner or admin role in metadata or app_metadata
+      final role = (user.userMetadata?['role'] as String?) ??
+          (user.appMetadata['role'] as String?);
+      final roles = (user.userMetadata?['roles'] as List<dynamic>?) ??
+          (user.appMetadata['roles'] as List<dynamic>?);
+      final isOwnerRole = role == 'owner' ||
+          role == 'venue_owner' ||
+          role == 'institute_owner' ||
+          role == 'admin' ||
+          role == 'administrator' ||
+          (roles?.any((r) =>
+                  r == 'owner' ||
+                  r == 'venue_owner' ||
+                  r == 'institute_owner' ||
+                  r == 'admin' ||
+                  r == 'administrator') ??
+              false);
+
+      if (isOwnerRole) {
         return Owner(
           id: user.id,
           userId: user.id,
           email: user.email ?? '',
-          name: (user.userMetadata?['name'] as String?) ?? user.email?.split('@').first ?? 'Space Partner',
+          name: (user.userMetadata?['name'] as String?) ??
+              user.email?.split('@').first ??
+              'Space Partner',
         );
       }
       return null;
     } catch (e) {
-      final user = _client.auth.currentUser;
-      if (user != null) {
-        return Owner(
-          id: user.id,
-          userId: user.id,
-          email: user.email ?? '',
-          name: (user.userMetadata?['name'] as String?) ?? 'Space Partner',
-        );
-      }
       return null;
     }
   }

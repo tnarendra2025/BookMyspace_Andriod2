@@ -1,12 +1,56 @@
 import express from 'express';
 import path from 'path';
+import fs from 'fs';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
+import { DEFAULT_CUSTOMER_REGISTRATION_FIELDS } from './src/data/defaultRegistrationFields';
 
 const app = express();
 const PORT = 3000;
 
 app.use(express.json());
+
+// Persistent Registration Fields Database Storage
+const DB_DIR = path.join(process.cwd(), 'data');
+const REGISTRATION_FIELDS_FILE = path.join(DB_DIR, 'registration_fields_db.json');
+
+function getRegistrationFieldsDb(): any[] {
+  try {
+    if (fs.existsSync(REGISTRATION_FIELDS_FILE)) {
+      const data = fs.readFileSync(REGISTRATION_FIELDS_FILE, 'utf-8');
+      const parsed = JSON.parse(data);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch (err) {
+    console.error('Error reading registration_fields_db.json:', err);
+  }
+
+  // Auto-seed with default fields if empty or missing
+  try {
+    if (!fs.existsSync(DB_DIR)) {
+      fs.mkdirSync(DB_DIR, { recursive: true });
+    }
+    fs.writeFileSync(REGISTRATION_FIELDS_FILE, JSON.stringify(DEFAULT_CUSTOMER_REGISTRATION_FIELDS, null, 2), 'utf-8');
+  } catch (err) {
+    console.error('Error seeding registration_fields_db.json:', err);
+  }
+  return DEFAULT_CUSTOMER_REGISTRATION_FIELDS;
+}
+
+function saveRegistrationFieldsDb(fields: any[]): boolean {
+  try {
+    if (!fs.existsSync(DB_DIR)) {
+      fs.mkdirSync(DB_DIR, { recursive: true });
+    }
+    fs.writeFileSync(REGISTRATION_FIELDS_FILE, JSON.stringify(fields, null, 2), 'utf-8');
+    return true;
+  } catch (err) {
+    console.error('Error saving registration_fields_db.json:', err);
+    return false;
+  }
+}
 
 // Lazy-initialized Gemini client
 let aiClient: GoogleGenAI | null = null;
@@ -34,6 +78,151 @@ app.get('/api/health', (req, res) => {
     hasGeminiKey: Boolean(process.env.GEMINI_API_KEY),
     timestamp: Date.now(),
   });
+});
+
+// ============================================================================
+// Dynamic Registration & KYC Fields Database Endpoints
+// ============================================================================
+
+// 1. Get all registration fields from persistent database
+app.get('/api/registration-fields', (req, res) => {
+  try {
+    const fields = getRegistrationFieldsDb();
+    res.json({
+      success: true,
+      fields,
+      total: fields.length,
+      source: 'persistent-db',
+      timestamp: Date.now(),
+    });
+  } catch (err: any) {
+    console.error('Error in GET /api/registration-fields:', err);
+    res.status(500).json({ error: 'Failed to retrieve registration fields', details: err?.message });
+  }
+});
+
+// 2. Batch save or append registration fields
+app.post('/api/registration-fields', (req, res) => {
+  try {
+    const { fields, field } = req.body;
+
+    if (Array.isArray(fields)) {
+      const saved = saveRegistrationFieldsDb(fields);
+      if (saved) {
+        res.json({
+          success: true,
+          message: 'All registration fields saved to database successfully',
+          total: fields.length,
+          fields,
+          timestamp: Date.now(),
+        });
+        return;
+      }
+      res.status(500).json({ error: 'Failed to write fields to database' });
+      return;
+    }
+
+    if (field && typeof field === 'object') {
+      const current = getRegistrationFieldsDb();
+      const newField = {
+        ...field,
+        id: field.id || `crf_custom_${Date.now()}`,
+        displayOrder: field.displayOrder || current.length + 1,
+      };
+      const updatedList = [...current, newField];
+      saveRegistrationFieldsDb(updatedList);
+      res.json({
+        success: true,
+        message: 'New custom registration field added to database',
+        field: newField,
+        fields: updatedList,
+        timestamp: Date.now(),
+      });
+      return;
+    }
+
+    res.status(400).json({ error: 'Invalid payload: Expected { fields: [...] } or { field: {...} }' });
+  } catch (err: any) {
+    console.error('Error in POST /api/registration-fields:', err);
+    res.status(500).json({ error: 'Failed to save registration fields', details: err?.message });
+  }
+});
+
+// 3. Update single field by ID
+app.put('/api/registration-fields/:id', (req, res) => {
+  try {
+    const fieldId = req.params.id;
+    const updateData = req.body;
+    const current = getRegistrationFieldsDb();
+    const index = current.findIndex((f) => f.id === fieldId);
+
+    if (index === -1) {
+      res.status(404).json({ error: `Registration field with id "${fieldId}" not found in database` });
+      return;
+    }
+
+    const updatedField = {
+      ...current[index],
+      ...updateData,
+      id: fieldId, // enforce immutable id
+    };
+    current[index] = updatedField;
+    saveRegistrationFieldsDb(current);
+
+    res.json({
+      success: true,
+      message: `Field "${updatedField.label}" updated in database`,
+      field: updatedField,
+      fields: current,
+      timestamp: Date.now(),
+    });
+  } catch (err: any) {
+    console.error('Error in PUT /api/registration-fields/:id:', err);
+    res.status(500).json({ error: 'Failed to update registration field', details: err?.message });
+  }
+});
+
+// 4. Delete single field by ID
+app.delete('/api/registration-fields/:id', (req, res) => {
+  try {
+    const fieldId = req.params.id;
+    const current = getRegistrationFieldsDb();
+    const filtered = current.filter((f) => f.id !== fieldId);
+
+    if (filtered.length === current.length) {
+      res.status(404).json({ error: `Field with id "${fieldId}" not found` });
+      return;
+    }
+
+    saveRegistrationFieldsDb(filtered);
+    res.json({
+      success: true,
+      message: `Registration field "${fieldId}" deleted from database`,
+      deletedId: fieldId,
+      total: filtered.length,
+      timestamp: Date.now(),
+    });
+  } catch (err: any) {
+    console.error('Error in DELETE /api/registration-fields/:id:', err);
+    res.status(500).json({ error: 'Failed to delete field', details: err?.message });
+  }
+});
+
+// 5. Reset fields in database to official default schema
+app.post('/api/registration-fields/reset', (req, res) => {
+  try {
+    saveRegistrationFieldsDb(DEFAULT_CUSTOMER_REGISTRATION_FIELDS);
+    res.json({
+      success: true,
+      message: 'Registration fields database reset to official default schema',
+      fields: DEFAULT_CUSTOMER_REGISTRATION_FIELDS,
+      total: DEFAULT_CUSTOMER_REGISTRATION_FIELDS.length,
+      timestamp: Date.now(),
+    });
+  } catch (err: any) {
+    console.error('Error in POST /api/registration-fields/reset:', err);
+    res.status(500).json({ error: 'Failed to reset registration fields database', details: err?.message });
+  }
 });
 
 // AI Booking Recommendation Endpoint
