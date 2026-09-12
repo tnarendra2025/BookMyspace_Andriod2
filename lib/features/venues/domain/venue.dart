@@ -367,6 +367,7 @@ class Venue {
 class VenueSearchQuery {
   const VenueSearchQuery({
     this.query = '',
+    this.categoryId,
     this.categorySlug,
     this.city,
     this.minPrice,
@@ -375,6 +376,7 @@ class VenueSearchQuery {
   });
 
   final String query;
+  final String? categoryId;
   final String? categorySlug;
   final String? city;
   final double? minPrice;
@@ -383,6 +385,7 @@ class VenueSearchQuery {
 
   bool get hasFilters =>
       query.isNotEmpty ||
+      categoryId != null ||
       categorySlug != null ||
       city != null ||
       minPrice != null ||
@@ -391,6 +394,7 @@ class VenueSearchQuery {
 
   VenueSearchQuery copyWith({
     String? query,
+    String? Function()? categoryId,
     String? Function()? categorySlug,
     String? Function()? city,
     double? Function()? minPrice,
@@ -399,6 +403,7 @@ class VenueSearchQuery {
   }) {
     return VenueSearchQuery(
       query: query ?? this.query,
+      categoryId: categoryId != null ? categoryId() : this.categoryId,
       categorySlug: categorySlug != null ? categorySlug() : this.categorySlug,
       city: city != null ? city() : this.city,
       minPrice: minPrice != null ? minPrice() : this.minPrice,

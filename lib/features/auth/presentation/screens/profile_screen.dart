@@ -289,6 +289,18 @@ class ProfileScreen extends ConsumerWidget {
                   onTap: () => context.push(AppRoutes.ownerDashboard),
                 ),
                 _ProfileMenuTile(
+                  icon: Icons.hub_outlined,
+                  title: 'External Integrations Hub',
+                  subtitle: 'Third-party APIs, sync connectors, and webhooks',
+                  onTap: () => context.push(AppRoutes.adminIntegrations),
+                ),
+                _ProfileMenuTile(
+                  icon: Icons.smart_toy_outlined,
+                  title: 'MCP AI Tools Server',
+                  subtitle: 'Model Context Protocol allowlist & gateway',
+                  onTap: () => context.push(AppRoutes.adminMcp),
+                ),
+                _ProfileMenuTile(
                   icon: Icons.headset_mic_outlined,
                   title: 'Support & Help Desk',
                   subtitle: 'Get quick assistance with bookings',

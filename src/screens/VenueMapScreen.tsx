@@ -15,12 +15,17 @@ import {
   Building2,
   Layers,
   ArrowRight,
+  ArrowLeft,
+  Filter,
 } from 'lucide-react';
 import { Venue } from '../types';
+import { isFunctionHallCategory, FUNCTION_HALL_CATEGORIES } from '../data/mockData';
 
 export const VenueMapScreen: React.FC = () => {
   const {
     venues,
+    backendFilteredVenues,
+    fetchVenuesByBackendCategory,
     selectedLocation,
     setSelectedVenueId,
     setActiveScreen,
@@ -34,6 +39,13 @@ export const VenueMapScreen: React.FC = () => {
   // Selected Pin Venue for Map mode preview
   const [selectedPinVenue, setSelectedPinVenue] = useState<Venue | null>(venues[0] || null);
   const [filterCategory, setFilterCategory] = useState<string>('all');
+
+  // Trigger backend category query whenever category filter changes in map screen
+  React.useEffect(() => {
+    if (filterCategory !== 'all') {
+      fetchVenuesByBackendCategory(filterCategory);
+    }
+  }, [filterCategory, fetchVenuesByBackendCategory]);
 
   // Location Pin Drop & Radius State
   const [droppedPin, setDroppedPin] = useState<{ x: number; y: number; label: string; lat: number; lng: number }>({
@@ -95,9 +107,19 @@ export const VenueMapScreen: React.FC = () => {
     });
   }, [venues, droppedPin, venueCoordinates]);
 
+  // Check if active filter category is within the Function Halls domain
+  const isFunctionHallActive = useMemo(() => {
+    return isFunctionHallCategory(filterCategory);
+  }, [filterCategory]);
+
   // Filtered venues for interactive map mode
   const filteredMapVenues = useMemo(() => {
     if (filterCategory === 'all') return venuesWithCalculatedDistance;
+    if (filterCategory === 'function_hall' || filterCategory === 'all_function_halls') {
+      return venuesWithCalculatedDistance.filter(
+        (v) => isFunctionHallCategory(v.category.slug) || v.category.parentSection === 'function_halls'
+      );
+    }
     return venuesWithCalculatedDistance.filter((v) => v.category.slug === filterCategory);
   }, [filterCategory, venuesWithCalculatedDistance]);
 
@@ -210,32 +232,73 @@ export const VenueMapScreen: React.FC = () => {
 
       {/* Mode Specific Controls Sub-bar */}
       {bookingMode === 'interactive_map' ? (
-        <div className="bg-white px-3.5 py-2.5 rounded-2xl border border-slate-200/90 flex items-center justify-between gap-3 overflow-x-auto no-scrollbar">
-          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0 flex items-center gap-1">
-            <Building2 className="w-3.5 h-3.5 text-indigo-600" />
-            Filter Category:
-          </span>
+        <div className="bg-white px-3.5 py-2.5 rounded-2xl border border-slate-200/90 flex flex-wrap items-center justify-between gap-3 overflow-x-auto no-scrollbar">
           <div className="flex items-center gap-1.5 shrink-0">
-            {[
-              { id: 'all', label: t.allSpaces },
-              { id: 'function_hall', label: t.functionHalls },
-              { id: 'sports_turf', label: t.sportsTurfs },
-              { id: 'hotel_stay', label: t.hotelsSuites },
-              { id: 'pg_hostel', label: t.pgHostels },
-              { id: 'co_working', label: t.coworkingDesks },
-            ].map((c) => (
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
+              <Building2 className="w-3.5 h-3.5 text-rose-600" />
+              {isFunctionHallActive ? 'Hall Category:' : 'Filter Category:'}
+            </span>
+            {isFunctionHallActive && (
+              <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-rose-100 text-rose-700">
+                Function Halls Only
+              </span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-1.5 shrink-0 overflow-x-auto no-scrollbar py-0.5">
+            {/* If Function Hall mode active, show Back to All Categories button */}
+            {isFunctionHallActive && (
               <button
-                key={c.id}
-                onClick={() => setFilterCategory(c.id)}
-                className={`px-3 py-1 text-xs font-bold rounded-xl border transition-colors cursor-pointer ${
-                  filterCategory === c.id
-                    ? 'bg-slate-950 text-white border-slate-950 shadow-xs'
-                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-                }`}
+                onClick={() => setFilterCategory('all')}
+                className="px-2.5 py-1 text-xs font-bold rounded-xl border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 transition-colors flex items-center gap-1 shadow-xs"
               >
-                {c.label}
+                <ArrowLeft className="w-3 h-3" />
+                <span>All Categories</span>
               </button>
-            ))}
+            )}
+
+            {isFunctionHallActive
+              ? [
+                  { id: 'function_hall', label: 'All Function Halls', emoji: '🏛️' },
+                  { id: 'marriage_hall', label: 'Marriage Halls', emoji: '💒' },
+                  { id: 'banquet_hall', label: 'Banquet Halls', emoji: '🥂' },
+                  { id: 'convention_center', label: 'Convention Centers', emoji: '🏢' },
+                  { id: 'mini_function_hall', label: 'Mini AC Halls', emoji: '✨' },
+                  { id: 'party_hall', label: 'Party Lawns', emoji: '🎈' },
+                ].map((c) => (
+                  <button
+                    key={c.id}
+                    onClick={() => setFilterCategory(c.id)}
+                    className={`px-3 py-1 text-xs font-bold rounded-xl border transition-colors cursor-pointer flex items-center gap-1.5 shrink-0 ${
+                      filterCategory === c.id
+                        ? 'bg-rose-600 text-white border-rose-600 shadow-xs'
+                        : 'bg-rose-50/80 text-rose-800 border-rose-200 hover:bg-rose-100'
+                    }`}
+                  >
+                    <span>{c.emoji}</span>
+                    <span>{c.label}</span>
+                  </button>
+                ))
+              : [
+                  { id: 'all', label: t.allSpaces },
+                  { id: 'function_hall', label: t.functionHalls },
+                  { id: 'sports_turf', label: t.sportsTurfs },
+                  { id: 'hotel_stay', label: t.hotelsSuites },
+                  { id: 'pg_hostel', label: t.pgHostels },
+                  { id: 'co_working', label: t.coworkingDesks },
+                ].map((c) => (
+                  <button
+                    key={c.id}
+                    onClick={() => setFilterCategory(c.id)}
+                    className={`px-3 py-1 text-xs font-bold rounded-xl border transition-colors cursor-pointer ${
+                      filterCategory === c.id
+                        ? 'bg-slate-950 text-white border-slate-950 shadow-xs'
+                        : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                    }`}
+                  >
+                    {c.label}
+                  </button>
+                ))}
           </div>
         </div>
       ) : (

@@ -26,6 +26,7 @@ class AppLocalizations {
   String get navHome => 'Home';
   String get navSearch => 'Search';
   String get navBookings => 'Bookings';
+  String get navSaved => 'Saved';
   String get navProfile => 'Profile';
   String get notifications => 'Notifications';
   String get courses => 'Courses';

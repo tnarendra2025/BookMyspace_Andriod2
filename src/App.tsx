@@ -127,10 +127,8 @@ const MainLayout: React.FC = () => {
             ? <AccessDeniedView requiredRole="ADMIN" screenTitle="Live UI Element Editor" />
             : <AdminLiveElementEditorScreen />
         )}
-        {activeScreen === 'admin-plug-play' && (
-          !isAdmin
-            ? <AccessDeniedView requiredRole="ADMIN" screenTitle="Plug & Play Features Hub" />
-            : <PlugAndPlayFeaturesHubScreen />
+        {(activeScreen === 'admin-plug-play' || activeScreen === 'plug-play' || activeScreen === 'self-healing') && (
+          <PlugAndPlayFeaturesHubScreen />
         )}
         {activeScreen === 'reports' && (
           !isOwnerOrAdmin

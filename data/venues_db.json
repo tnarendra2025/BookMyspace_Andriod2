@@ -1,0 +1,1881 @@
+[
+  {
+    "id": "v_grand_palace",
+    "name": "The Royal Imperial Palace & Convention",
+    "slug": "the-royal-imperial-palace",
+    "description": "Palatial luxury air-conditioned banquet and convention destination featuring crystal chandeliers, 25-ft ceiling height, VIP bridal suites, Italian marble flooring, and expansive open manicured lawns for grand weddings and receptions.",
+    "addressLine1": "Road No 36, Jubilee Hills",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "latitude": 17.4319,
+    "longitude": 78.4073,
+    "capacity": 1200,
+    "minGuests": 250,
+    "maxGuests": 2000,
+    "distanceKm": 1.8,
+    "pricingBaseAmount": 185000,
+    "taxRate": 18,
+    "parkingCapacity": 350,
+    "foodOptions": "In-house Masterchefs & Verified External Caterers Permitted with NOC",
+    "rules": "Music permitted till 11:30 PM. Valet parking provided. Fire safety protocols strictly enforced.",
+    "isVerified": true,
+    "isActive": true,
+    "status": "APPROVED",
+    "avgRating": 4.9,
+    "ratingCount": 482,
+    "category": {
+      "id": "cat_function",
+      "slug": "function_hall",
+      "name": "Function Halls",
+      "iconName": "celebration",
+      "icon": "🏛️",
+      "isActive": true,
+      "isUnifiedRegistrationEnabled": true,
+      "parentSection": "function_halls"
+    },
+    "isSaved": true,
+    "featuredImageUrl": "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1200&q=80",
+    "images": [
+      {
+        "id": "img_rp_1",
+        "url": "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1200&q=80",
+        "altText": "Grand Ballroom with Chandeliers",
+        "isCover": true
+      },
+      {
+        "id": "img_rp_2",
+        "url": "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=1200&q=80",
+        "altText": "Luxury Stage Decor & Lighting",
+        "isCover": false
+      },
+      {
+        "id": "img_rp_3",
+        "url": "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&w=1200&q=80",
+        "altText": "Banquet Dining Table Setup",
+        "isCover": false
+      },
+      {
+        "id": "img_rp_4",
+        "url": "https://images.unsplash.com/photo-1545232979-fbf6a8c3d9b0?auto=format&fit=crop&w=1200&q=80",
+        "altText": "Illuminated Night Lawn & Fountains",
+        "isCover": false
+      }
+    ],
+    "videos": [
+      {
+        "id": "vid_rp_1",
+        "url": "https://assets.mixkit.co/videos/preview/mixkit-luxury-banquet-hall-ready-for-a-wedding-41122-large.mp4",
+        "title": "Grand Ballroom Drone 30s Walkthrough",
+        "thumbnailUrl": "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=600&q=80",
+        "durationSeconds": 32,
+        "aspectRatio": "9:16",
+        "isShort": true,
+        "viewsCount": 1420,
+        "uploadedAt": "Admin Uploaded"
+      },
+      {
+        "id": "vid_rp_2",
+        "url": "https://assets.mixkit.co/videos/preview/mixkit-aerial-view-of-a-luxury-hotel-resort-with-swimming-pools-41484-large.mp4",
+        "title": "VIP Bridal Suite & Illuminated Lawn Tour",
+        "thumbnailUrl": "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=600&q=80",
+        "durationSeconds": 45,
+        "aspectRatio": "16:9",
+        "isShort": false,
+        "viewsCount": 890,
+        "uploadedAt": "Admin Uploaded"
+      }
+    ],
+    "facilities": [
+      {
+        "facility": "Central Climate Control AC",
+        "isAvailable": true
+      },
+      {
+        "facility": "Valet Parking (350+ Cars)",
+        "isAvailable": true
+      },
+      {
+        "facility": "Bridal Suites (4 AC Rooms)",
+        "isAvailable": true
+      },
+      {
+        "facility": "Full Genset Generator Backup (100%)",
+        "isAvailable": true
+      },
+      {
+        "facility": "Pioneer Pro Sound & Stage Lighting",
+        "isAvailable": true
+      },
+      {
+        "facility": "Wheelchair Ramps & Elevators",
+        "isAvailable": true
+      }
+    ],
+    "packages": [
+      {
+        "id": "pkg_rp_gold",
+        "name": "Royal Imperial Full-Day Wedding Package",
+        "priceAmount": 350000,
+        "description": "Complete 24-hour ballroom access, grand stage decor lighting, 4 luxury suites, valet staff, and 100% generator backup.",
+        "itemsIncluded": [
+          "24-Hour Hall Rental",
+          "4 Furnished Bridal Suites",
+          "Valet Staff & Traffic Marshals",
+          "Sound & Stage Lighting"
+        ],
+        "vegPlatePrice": 1200,
+        "nonVegPlatePrice": 1550
+      },
+      {
+        "id": "pkg_rp_silver",
+        "name": "Evening Reception Package (6 Hours)",
+        "priceAmount": 220000,
+        "description": "6-hour evening slot (5 PM - 11 PM) with ambient uplighting, guest greeting foyer, and basic audio.",
+        "itemsIncluded": [
+          "6 Hours Access",
+          "2 Green Rooms",
+          "Security & Cleaning Crew",
+          "Generator Fuel Included"
+        ],
+        "vegPlatePrice": 950,
+        "nonVegPlatePrice": 1300
+      }
+    ],
+    "addons": [
+      {
+        "id": "add_rp_dj",
+        "name": "Professional DJ Console & Sound Rig",
+        "priceAmount": 25000,
+        "description": "Twin JBL line array speakers with moving heads."
+      },
+      {
+        "id": "add_rp_drone",
+        "name": "Live Video Wall (20x10 ft LED)",
+        "priceAmount": 35000,
+        "description": "P3 indoor ultra-HD LED screen with live camera switcher."
+      }
+    ],
+    "timeSlots": [
+      {
+        "id": "ts_rp_1",
+        "label": "Morning Muhurtham (06:00 AM - 02:00 PM)",
+        "startTime": "06:00",
+        "endTime": "14:00",
+        "priceAmount": 140000,
+        "isAvailable": true
+      },
+      {
+        "id": "ts_rp_2",
+        "label": "Evening Reception (04:00 PM - 11:30 PM)",
+        "startTime": "16:00",
+        "endTime": "23:30",
+        "priceAmount": 185000,
+        "isAvailable": true
+      },
+      {
+        "id": "ts_rp_3",
+        "label": "Full 24-Hour Day Slot",
+        "startTime": "06:00",
+        "endTime": "06:00 (Next Day)",
+        "priceAmount": 295000,
+        "isAvailable": false
+      }
+    ],
+    "contactPhone": "+91 98765 43210",
+    "contactWhatsapp": "919876543210",
+    "locationHierarchy": {
+      "state": "Telangana",
+      "district": "Hyderabad",
+      "city": "Hyderabad",
+      "area": "Jubilee Hills / Banjara Hills",
+      "pincode": "500033",
+      "fullAddressText": "Road No 36, Jubilee Hills, Hyderabad, Telangana 500033"
+    },
+    "ownerId": "user_venue_owner",
+    "categoryId": "cat_function"
+  },
+  {
+    "id": "v_smash_arena",
+    "name": "Smash Arena International Badminton & Turf",
+    "slug": "smash-arena-international-badminton",
+    "description": "Premier indoor sports complex equipped with 6 BWF-certified synthetic wooden badminton courts, floodlit 7-a-side FIFA turf football pitch, pro shop, locker showers, and coaching academies.",
+    "addressLine1": "Financial District, Nanakramguda",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "latitude": 17.4156,
+    "longitude": 78.3498,
+    "capacity": 120,
+    "distanceKm": 4.2,
+    "pricingBaseAmount": 650,
+    "taxRate": 18,
+    "parkingCapacity": 60,
+    "foodOptions": "Sports Nutrition Cafe, Fresh Juices & Protein Shakes",
+    "rules": "Non-marking badminton shoes strictly required. Studded boots prohibited on indoor wooden courts.",
+    "isVerified": true,
+    "isActive": true,
+    "status": "APPROVED",
+    "avgRating": 4.85,
+    "ratingCount": 640,
+    "category": {
+      "id": "cat_sports",
+      "slug": "sports_turf",
+      "name": "Sports & Turf",
+      "iconName": "sports_tennis",
+      "icon": "🏸",
+      "isActive": true,
+      "isUnifiedRegistrationEnabled": true,
+      "parentSection": "sports_workspaces"
+    },
+    "isSaved": true,
+    "featuredImageUrl": "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=1200&q=80",
+    "images": [
+      {
+        "id": "img_sa_1",
+        "url": "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=1200&q=80",
+        "altText": "BWF Badminton Court",
+        "isCover": true
+      },
+      {
+        "id": "img_sa_2",
+        "url": "https://images.unsplash.com/photo-1529900748604-07564a03e7a6?auto=format&fit=crop&w=1200&q=80",
+        "altText": "FIFA Turf Football Pitch",
+        "isCover": false
+      },
+      {
+        "id": "img_sa_3",
+        "url": "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1200&q=80",
+        "altText": "Sports Pro Store & Lounge",
+        "isCover": false
+      }
+    ],
+    "videos": [
+      {
+        "id": "vid_sa_1",
+        "url": "https://assets.mixkit.co/videos/preview/mixkit-cricket-match-bowling-and-batting-in-the-nets-49938-large.mp4",
+        "title": "BWF Court & Box Cricket Night Action Reel",
+        "thumbnailUrl": "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=600&q=80",
+        "durationSeconds": 28,
+        "aspectRatio": "9:16",
+        "isShort": true,
+        "viewsCount": 2310,
+        "uploadedAt": "Admin Uploaded"
+      }
+    ],
+    "facilities": [
+      {
+        "facility": "6 BWF Approved Synthetic Courts",
+        "isAvailable": true
+      },
+      {
+        "facility": "Air-Conditioned Waiting Lounge",
+        "isAvailable": true
+      },
+      {
+        "facility": "Showers & Clean Changing Rooms",
+        "isAvailable": true
+      },
+      {
+        "facility": "Equipment Rental (Racquets & Shoes)",
+        "isAvailable": true
+      },
+      {
+        "facility": "Ample Car & Bike Parking",
+        "isAvailable": true
+      }
+    ],
+    "packages": [
+      {
+        "id": "pkg_sa_hour",
+        "name": "Single Court 1-Hour Booking",
+        "priceAmount": 650,
+        "description": "One court for up to 4 players for 60 minutes.",
+        "itemsIncluded": [
+          "Court Access",
+          "Complimentary Drinking Water"
+        ]
+      },
+      {
+        "id": "pkg_sa_block",
+        "name": "Weekend Tournament Block (4 Hours)",
+        "priceAmount": 4800,
+        "description": "Two courts reserved simultaneously for 4 hours.",
+        "itemsIncluded": [
+          "2 Courts for 4h",
+          "Tournament Scoreboards"
+        ]
+      }
+    ],
+    "addons": [
+      {
+        "id": "add_sa_racquet",
+        "name": "Yonex Carbon Racquet Rental (Pair)",
+        "priceAmount": 150,
+        "description": "Two strung graphite racquets."
+      },
+      {
+        "id": "add_sa_shuttle",
+        "name": "Yonex Mavis 350 Nylon Shuttles (Pack of 3)",
+        "priceAmount": 380,
+        "description": "Brand new certified shuttles."
+      }
+    ],
+    "timeSlots": [
+      {
+        "id": "ts_sa_1",
+        "label": "06:00 AM - 07:00 AM (Early Bird)",
+        "startTime": "06:00",
+        "endTime": "07:00",
+        "priceAmount": 500,
+        "isAvailable": true
+      },
+      {
+        "id": "ts_sa_2",
+        "label": "07:00 AM - 08:00 AM (Prime Morning)",
+        "startTime": "07:00",
+        "endTime": "08:00",
+        "priceAmount": 650,
+        "isAvailable": true
+      },
+      {
+        "id": "ts_sa_3",
+        "label": "06:00 PM - 07:00 PM (Peak Evening)",
+        "startTime": "18:00",
+        "endTime": "19:00",
+        "priceAmount": 850,
+        "isAvailable": true
+      },
+      {
+        "id": "ts_sa_4",
+        "label": "07:00 PM - 08:00 PM (Peak Evening)",
+        "startTime": "19:00",
+        "endTime": "20:00",
+        "priceAmount": 850,
+        "isAvailable": false
+      },
+      {
+        "id": "ts_sa_5",
+        "label": "08:00 PM - 09:00 PM (Night Turf)",
+        "startTime": "20:00",
+        "endTime": "21:00",
+        "priceAmount": 750,
+        "isAvailable": true
+      }
+    ],
+    "contactPhone": "+91 99887 76655",
+    "contactWhatsapp": "919988776655",
+    "locationHierarchy": {
+      "state": "Telangana",
+      "district": "Hyderabad",
+      "city": "Hyderabad",
+      "area": "Gachibowli / Hitec City",
+      "pincode": "500081",
+      "fullAddressText": "Financial District, Gachibowli, Hyderabad, Telangana 500081"
+    },
+    "ownerId": "user_venue_owner",
+    "categoryId": "cat_sports"
+  },
+  {
+    "id": "v_sri_krishna_mandapam",
+    "name": "Sri Krishna Grand Kalyana Mandapam & Marriage Hall",
+    "slug": "sri-krishna-grand-kalyana-mandapam",
+    "description": "Traditional and majestic South Indian wedding kalyana mandapam with carved stone pillars, elevated wedding dais, 500-seater pure vegetarian banana leaf dining hall, and 12 air-conditioned guest suites.",
+    "addressLine1": "Gandhi Road, Near RTC Complex",
+    "city": "Ongole",
+    "state": "Andhra Pradesh",
+    "latitude": 15.503,
+    "longitude": 80.046,
+    "capacity": 900,
+    "minGuests": 150,
+    "maxGuests": 1500,
+    "distanceKm": 1.2,
+    "pricingBaseAmount": 95000,
+    "taxRate": 18,
+    "parkingCapacity": 180,
+    "foodOptions": "Traditional Pure Vegetarian Steam Kitchen with Plantain Leaf Dining Setup",
+    "rules": "Traditional ceremonies and Vedic rituals welcome. Homa Kundam zone designated with exhaust.",
+    "isVerified": true,
+    "isActive": true,
+    "status": "APPROVED",
+    "avgRating": 4.8,
+    "ratingCount": 310,
+    "category": {
+      "id": "cat_marriage",
+      "slug": "marriage_hall",
+      "name": "Marriage Halls",
+      "iconName": "church",
+      "icon": "💒",
+      "isActive": true,
+      "isUnifiedRegistrationEnabled": true,
+      "parentSection": "function_halls"
+    },
+    "isSaved": false,
+    "featuredImageUrl": "https://images.unsplash.com/photo-1544077960-604201fe74bc?auto=format&fit=crop&w=1200&q=80",
+    "images": [
+      {
+        "id": "img_sk_1",
+        "url": "https://images.unsplash.com/photo-1544077960-604201fe74bc?auto=format&fit=crop&w=1200&q=80",
+        "altText": "Majestic Mandapam Stage",
+        "isCover": true
+      },
+      {
+        "id": "img_sk_2",
+        "url": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
+        "altText": "Floral Mandapam Arches",
+        "isCover": false
+      }
+    ],
+    "facilities": [
+      {
+        "facility": "AC Main Wedding Hall (900 seats)",
+        "isAvailable": true
+      },
+      {
+        "facility": "12 Furnished AC Guest Rooms",
+        "isAvailable": true
+      },
+      {
+        "facility": "Separate 500-Seater Dining Hall",
+        "isAvailable": true
+      },
+      {
+        "facility": "Dedicated Pooja & Yagya Kundam Area",
+        "isAvailable": true
+      },
+      {
+        "facility": "Heavy Generator Power Backup",
+        "isAvailable": true
+      }
+    ],
+    "packages": [
+      {
+        "id": "pkg_sk_wedding",
+        "name": "Full Kalyanam Package (2 Days / 1 Night)",
+        "priceAmount": 160000,
+        "description": "Includes wedding auditorium, dining hall, and 12 AC guest rooms for bride and groom parties.",
+        "itemsIncluded": [
+          "2-Day Access",
+          "12 AC Rooms",
+          "Gas Steam Cooking Range",
+          "Generator Fuel"
+        ]
+      }
+    ],
+    "addons": [
+      {
+        "id": "add_sk_nad",
+        "name": "Traditional Nadaswaram & Melam Troupe",
+        "priceAmount": 18000,
+        "description": "Experienced 5-member traditional Carnatic wedding ensemble."
+      }
+    ],
+    "timeSlots": [
+      {
+        "id": "ts_sk_1",
+        "label": "Morning Wedding Slot (05:00 AM - 02:00 PM)",
+        "startTime": "05:00",
+        "endTime": "14:00",
+        "priceAmount": 95000,
+        "isAvailable": true
+      },
+      {
+        "id": "ts_sk_2",
+        "label": "Evening Reception (04:00 PM - 11:00 PM)",
+        "startTime": "16:00",
+        "endTime": "23:00",
+        "priceAmount": 75000,
+        "isAvailable": true
+      }
+    ],
+    "contactPhone": "+91 94401 23456",
+    "contactWhatsapp": "919440123456",
+    "locationHierarchy": {
+      "state": "Andhra Pradesh",
+      "district": "Prakasam",
+      "city": "Ongole",
+      "area": "Gandhi Road / Trunk Road",
+      "pincode": "523001",
+      "fullAddressText": "Trunk Road, Near RTC Complex, Ongole, Andhra Pradesh 523001"
+    },
+    "ownerId": "user_venue_owner",
+    "categoryId": "cat_marriage"
+  },
+  {
+    "id": "v_stanza_living_pg",
+    "name": "Stanza Prime Co-Living & Luxury PG",
+    "slug": "stanza-prime-coliving-pg",
+    "description": "Contemporary tech-enabled managed accommodation with ergonomic work desks, high-speed Wi-Fi 6, 3 homestyle meals daily, biometric entry, gym, gaming lounge, and housekeeping for students and working professionals.",
+    "addressLine1": "Near Mindspace IT Park, Hitec City",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "latitude": 17.4412,
+    "longitude": 78.3809,
+    "capacity": 180,
+    "distanceKm": 2.9,
+    "pricingBaseAmount": 11500,
+    "taxRate": 5,
+    "parkingCapacity": 50,
+    "foodOptions": "Buffet Breakfast, Lunch & Dinner Included (Veg & Non-Veg 4x/week)",
+    "rules": "Visitor hours till 9 PM. Biometric smart lock entry. Zero tolerance for smoking in bedrooms.",
+    "isVerified": true,
+    "isActive": true,
+    "status": "APPROVED",
+    "avgRating": 4.7,
+    "ratingCount": 198,
+    "category": {
+      "id": "cat_pg",
+      "slug": "pg_hostel",
+      "name": "PG & Hostels",
+      "iconName": "house",
+      "icon": "🏠",
+      "isActive": true,
+      "isUnifiedRegistrationEnabled": true,
+      "parentSection": "pg_hostels"
+    },
+    "isSaved": false,
+    "featuredImageUrl": "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=1200&q=80",
+    "images": [
+      {
+        "id": "img_pg_1",
+        "url": "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=1200&q=80",
+        "altText": "Modern Co-Living Room",
+        "isCover": true
+      },
+      {
+        "id": "img_pg_2",
+        "url": "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=1200&q=80",
+        "altText": "Single Room with Study Setup",
+        "isCover": false
+      },
+      {
+        "id": "img_pg_3",
+        "url": "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=1200&q=80",
+        "altText": "Community Lounge and Cafeteria",
+        "isCover": false
+      }
+    ],
+    "facilities": [
+      {
+        "facility": "High-Speed 200 Mbps Wi-Fi",
+        "isAvailable": true
+      },
+      {
+        "facility": "3 Chef-Curated Meals Daily",
+        "isAvailable": true
+      },
+      {
+        "facility": "Daily Housekeeping & Linen Change",
+        "isAvailable": true
+      },
+      {
+        "facility": "Automatic Washing Machines & Dryers",
+        "isAvailable": true
+      },
+      {
+        "facility": "24/7 CCTV & Biometric Security",
+        "isAvailable": true
+      }
+    ],
+    "pgDetails": {
+      "pgType": "Co-Living (Men & Women Wings)",
+      "gateLockTime": "11:00 PM",
+      "noticePeriodDays": 30,
+      "securityDepositMonths": 1,
+      "mealPlan": "3 Meals Included (North & South Indian menu)",
+      "preferredOccupants": "Software Engineers, Doctors & Students",
+      "electricityCharges": "Metered at ₹8.5 / unit",
+      "maintenanceFee": 0,
+      "sharingOptions": [
+        {
+          "id": "pg_opt_single",
+          "typeName": "Private Deluxe Single Room",
+          "monthlyRent": 18500,
+          "depositAmount": 18500,
+          "isAvailable": true,
+          "roomFeatures": [
+            "Attached Washroom",
+            "Private Balcony",
+            "Study Desk",
+            "Smart TV"
+          ]
+        },
+        {
+          "id": "pg_opt_double",
+          "typeName": "Twin Sharing AC Room",
+          "monthlyRent": 11500,
+          "depositAmount": 11500,
+          "isAvailable": true,
+          "roomFeatures": [
+            "Attached Washroom",
+            "Twin Desks",
+            "Spacious Wardrobes"
+          ]
+        },
+        {
+          "id": "pg_opt_triple",
+          "typeName": "Triple Sharing AC Room",
+          "monthlyRent": 8500,
+          "depositAmount": 8500,
+          "isAvailable": true,
+          "roomFeatures": [
+            "Attached Washroom",
+            "Lockable Wardrobes",
+            "High-Speed Wi-Fi"
+          ]
+        }
+      ]
+    },
+    "packages": [
+      {
+        "id": "pkg_pg_month",
+        "name": "Monthly Stay + Meals",
+        "priceAmount": 11500,
+        "description": "1 Month stay in Twin sharing room with all meals included.",
+        "itemsIncluded": [
+          "Twin Room",
+          "3 Meals Daily",
+          "Housekeeping",
+          "Wi-Fi"
+        ]
+      }
+    ],
+    "addons": [],
+    "timeSlots": [
+      {
+        "id": "ts_pg_visit_morning",
+        "label": "Schedule Visit - Morning (10:00 AM - 01:00 PM)",
+        "startTime": "10:00",
+        "endTime": "13:00",
+        "priceAmount": 0,
+        "isAvailable": true
+      },
+      {
+        "id": "ts_pg_visit_evening",
+        "label": "Schedule Visit - Evening (04:00 PM - 08:00 PM)",
+        "startTime": "16:00",
+        "endTime": "20:00",
+        "priceAmount": 0,
+        "isAvailable": true
+      }
+    ],
+    "contactPhone": "+91 97766 55443",
+    "contactWhatsapp": "919776655443",
+    "locationHierarchy": {
+      "state": "Telangana",
+      "district": "Hyderabad",
+      "city": "Hyderabad",
+      "area": "Gachibowli / Hitec City",
+      "pincode": "500081",
+      "fullAddressText": "Financial District, Gachibowli, Hyderabad, Telangana 500081"
+    },
+    "ownerId": "user_venue_owner",
+    "categoryId": "cat_pg"
+  },
+  {
+    "id": "v_novotel_hicc",
+    "name": "Novotel & HICC Luxury Hotel & Suites",
+    "slug": "novotel-hicc-luxury-hotel",
+    "description": "5-Star international luxury business hotel with soundproofed guest rooms, outdoor infinity swimming pool, holistic spa, 3 award-winning restaurants, and round-the-clock flexi day-stay options.",
+    "addressLine1": "Novotel & HICC Complex, Kondapur",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "latitude": 17.4728,
+    "longitude": 78.3725,
+    "capacity": 800,
+    "distanceKm": 5.5,
+    "pricingBaseAmount": 7800,
+    "taxRate": 18,
+    "parkingCapacity": 400,
+    "foodOptions": "The Square 24/7 Multi-Cuisine Buffet & La Cantina Pan-Asian Bar",
+    "rules": "Government photo ID required at check-in. Non-smoking suites available.",
+    "isVerified": true,
+    "isActive": true,
+    "status": "APPROVED",
+    "avgRating": 4.9,
+    "ratingCount": 890,
+    "category": {
+      "id": "cat_hotel",
+      "slug": "hotel_stay",
+      "name": "Hotels & Suites",
+      "iconName": "hotel",
+      "icon": "🏨",
+      "isActive": true,
+      "isUnifiedRegistrationEnabled": true,
+      "parentSection": "lodge_rooms"
+    },
+    "isSaved": true,
+    "featuredImageUrl": "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80",
+    "images": [
+      {
+        "id": "img_nv_1",
+        "url": "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80",
+        "altText": "5-Star Hotel Poolside",
+        "isCover": true
+      },
+      {
+        "id": "img_nv_2",
+        "url": "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=1200&q=80",
+        "altText": "Luxury Executive Suite",
+        "isCover": false
+      },
+      {
+        "id": "img_nv_3",
+        "url": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1200&q=80",
+        "altText": "Deluxe King Bedroom",
+        "isCover": false
+      }
+    ],
+    "facilities": [
+      {
+        "facility": "Outdoor Temperature-Controlled Pool",
+        "isAvailable": true
+      },
+      {
+        "facility": "O2 Holistic Wellness Spa & Jacuzzi",
+        "isAvailable": true
+      },
+      {
+        "facility": "24/7 LifeFitness Gymnasium",
+        "isAvailable": true
+      },
+      {
+        "facility": "Airport Transfer Shuttle",
+        "isAvailable": true
+      },
+      {
+        "facility": "Complimentary High-Speed Wi-Fi",
+        "isAvailable": true
+      }
+    ],
+    "hotelDetails": {
+      "starRating": 5,
+      "propertyType": "5-Star Luxury Business & Resort Hotel",
+      "roomTypes": [
+        "Superior King Room",
+        "Executive Business Suite",
+        "Day-Use Flexi Stay (6 Hours)"
+      ],
+      "checkInTime": "02:00 PM",
+      "checkOutTime": "12:00 PM",
+      "allowsFlexiStay": true
+    },
+    "packages": [
+      {
+        "id": "pkg_nv_night",
+        "name": "1-Night Deluxe Stay with Breakfast",
+        "priceAmount": 7800,
+        "description": "Superior King Room for 2 guests with complimentary buffet breakfast.",
+        "itemsIncluded": [
+          "1 Night Stay",
+          "Buffet Breakfast at The Square",
+          "Pool & Gym Access"
+        ]
+      },
+      {
+        "id": "pkg_nv_dayuse",
+        "name": "6-Hour Flexi Day Stay",
+        "priceAmount": 4200,
+        "description": "Flexible 6-hour room booking between 9 AM and 6 PM for business travellers.",
+        "itemsIncluded": [
+          "6-Hour Room Access",
+          "High-Speed Wi-Fi",
+          "Gym Access"
+        ]
+      }
+    ],
+    "addons": [
+      {
+        "id": "add_nv_spa",
+        "name": "60-Minute Swedish Massage for Couple",
+        "priceAmount": 6500,
+        "description": "Rejuvenating aromatherapy session at O2 Spa."
+      }
+    ],
+    "timeSlots": [
+      {
+        "id": "ts_nv_overnight",
+        "label": "Overnight Stay (Check-in 2 PM / Out 12 PM)",
+        "startTime": "14:00",
+        "endTime": "12:00",
+        "priceAmount": 7800,
+        "isAvailable": true
+      },
+      {
+        "id": "ts_nv_dayuse",
+        "label": "Flexi Day Slot (10:00 AM - 05:00 PM)",
+        "startTime": "10:00",
+        "endTime": "17:00",
+        "priceAmount": 4200,
+        "isAvailable": true
+      }
+    ],
+    "contactPhone": "+91 40 6682 4422",
+    "contactWhatsapp": "914066824422",
+    "locationHierarchy": {
+      "state": "Telangana",
+      "district": "Hyderabad",
+      "city": "Hyderabad",
+      "area": "Gachibowli / Hitec City",
+      "pincode": "500081",
+      "fullAddressText": "Financial District, Gachibowli, Hyderabad, Telangana 500081"
+    },
+    "ownerId": "user_venue_owner",
+    "categoryId": "cat_hotel"
+  },
+  {
+    "id": "v_sapphire_banquets",
+    "name": "Sapphire Sky Banquet & Rooftop Lounge",
+    "slug": "sapphire-sky-banquet-lounge",
+    "description": "Ultra-chic boutique party hall and covered rooftop banquet with mood lighting, surround sound system, and cocktail bar setup ideal for birthdays, anniversaries, sangeets, and corporate dinners.",
+    "addressLine1": "Kavuri Hills, Madhapur",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "latitude": 17.4435,
+    "longitude": 78.3965,
+    "capacity": 350,
+    "minGuests": 40,
+    "maxGuests": 450,
+    "distanceKm": 3.5,
+    "pricingBaseAmount": 45000,
+    "taxRate": 18,
+    "parkingCapacity": 90,
+    "foodOptions": "Gourmet Multi-cuisine Live Buffet & Mocktail Bar",
+    "rules": "Party music permitted till 11:30 PM. In-house decor and sound system included.",
+    "isVerified": true,
+    "isActive": true,
+    "status": "APPROVED",
+    "avgRating": 4.75,
+    "ratingCount": 215,
+    "category": {
+      "id": "cat_banquet",
+      "slug": "banquet_hall",
+      "name": "Banquet Halls",
+      "iconName": "restaurant",
+      "icon": "🥂",
+      "isActive": true,
+      "isUnifiedRegistrationEnabled": true,
+      "parentSection": "function_halls"
+    },
+    "isSaved": true,
+    "featuredImageUrl": "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1200&q=80",
+    "images": [
+      {
+        "id": "img_sb_1",
+        "url": "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1200&q=80",
+        "altText": "Chic Banquet Hall with Neon Mood Lighting",
+        "isCover": true
+      },
+      {
+        "id": "img_sb_2",
+        "url": "https://images.unsplash.com/photo-1527529482837-4698179dc6ce?auto=format&fit=crop&w=1200&q=80",
+        "altText": "Celebration Party Setup & DJ Sound Station",
+        "isCover": false
+      }
+    ],
+    "facilities": [
+      {
+        "facility": "Pioneer Pro DJ Sound & Uplighting",
+        "isAvailable": true
+      },
+      {
+        "facility": "Centralized Climate Control AC",
+        "isAvailable": true
+      },
+      {
+        "facility": "Valet Parking with Drivers",
+        "isAvailable": true
+      },
+      {
+        "facility": "Live Mocktail Bar & Lounge",
+        "isAvailable": true
+      }
+    ],
+    "packages": [
+      {
+        "id": "pkg_sb_party",
+        "name": "Evening Birthday / Sangeet Party (5 Hours)",
+        "priceAmount": 45000,
+        "description": "Hall with ambient uplights, DJ console, and catering space for 5 hours.",
+        "itemsIncluded": [
+          "5-Hour Slot",
+          "DJ Console",
+          "Sound System",
+          "Housekeeping"
+        ]
+      }
+    ],
+    "addons": [],
+    "timeSlots": [
+      {
+        "id": "ts_sb_afternoon",
+        "label": "Afternoon Get-Together (11:00 AM - 04:00 PM)",
+        "startTime": "11:00",
+        "endTime": "16:00",
+        "priceAmount": 35000,
+        "isAvailable": true
+      },
+      {
+        "id": "ts_sb_evening",
+        "label": "Evening Celebration (06:00 PM - 11:30 PM)",
+        "startTime": "18:00",
+        "endTime": "23:30",
+        "priceAmount": 45000,
+        "isAvailable": true
+      }
+    ],
+    "contactPhone": "+91 98765 11223",
+    "contactWhatsapp": "919876511223",
+    "locationHierarchy": {
+      "state": "Telangana",
+      "district": "Hyderabad",
+      "city": "Hyderabad",
+      "area": "Jubilee Hills / Banjara Hills",
+      "pincode": "500033",
+      "fullAddressText": "Road No 36, Jubilee Hills, Hyderabad, Telangana 500033"
+    },
+    "ownerId": "user_venue_owner",
+    "categoryId": "cat_banquet"
+  },
+  {
+    "id": "v_comfort_transit_stay",
+    "name": "Comfort Hub 24/7 Hourly Lodge & Transit Suites",
+    "slug": "comfort-hub-hourly-lodge",
+    "description": "Sanitized, premium air-conditioned transit suites with private attached bathrooms, work desks, and luggage assistance. Flexible micro-stay bookings for 3h, 6h, or overnight transit.",
+    "addressLine1": "Near Metro Station & Airport Express, Begumpet",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "latitude": 17.4447,
+    "longitude": 78.4664,
+    "capacity": 60,
+    "minGuests": 1,
+    "maxGuests": 4,
+    "distanceKm": 2.1,
+    "pricingBaseAmount": 450,
+    "taxRate": 12,
+    "parkingCapacity": 30,
+    "foodOptions": "24/7 Room Service & Healthy Quick Bites Cafe",
+    "rules": "Valid government ID mandatory for check-in. Instant digital confirmation key provided.",
+    "isVerified": true,
+    "isActive": true,
+    "status": "APPROVED",
+    "avgRating": 4.82,
+    "ratingCount": 340,
+    "category": {
+      "id": "cat_hourly",
+      "slug": "hourly_rooms",
+      "name": "Lodge & Hourly Stays",
+      "iconName": "hotel",
+      "icon": "🛏️",
+      "isActive": true,
+      "isUnifiedRegistrationEnabled": true,
+      "parentSection": "lodge_rooms"
+    },
+    "isSaved": false,
+    "featuredImageUrl": "https://images.unsplash.com/photo-1591088398332-8a7791972843?auto=format&fit=crop&w=1200&q=80",
+    "images": [
+      {
+        "id": "img_ch_1",
+        "url": "https://images.unsplash.com/photo-1591088398332-8a7791972843?auto=format&fit=crop&w=1200&q=80",
+        "altText": "Cozy AC Transit Room",
+        "isCover": true
+      },
+      {
+        "id": "img_ch_2",
+        "url": "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=1200&q=80",
+        "altText": "King Bed & Work Desk",
+        "isCover": false
+      }
+    ],
+    "facilities": [
+      {
+        "facility": "24/7 Express Check-in & Digital Smart Lock",
+        "isAvailable": true
+      },
+      {
+        "facility": "High-Speed Wi-Fi (150 Mbps)",
+        "isAvailable": true
+      },
+      {
+        "facility": "Attached Sanitized Washroom with Geyser",
+        "isAvailable": true
+      },
+      {
+        "facility": "Luggage Storage & Locker Room",
+        "isAvailable": true
+      }
+    ],
+    "packages": [
+      {
+        "id": "pkg_ch_3h",
+        "name": "3-Hour Micro Stay & Refresh",
+        "priceAmount": 1200,
+        "description": "3 hours room use with hot shower, clean bed, and Wi-Fi.",
+        "itemsIncluded": [
+          "3 Hours Room",
+          "Fresh Towels & Toiletries",
+          "Wi-Fi"
+        ]
+      },
+      {
+        "id": "pkg_ch_6h",
+        "name": "6-Hour Business Transit Stay",
+        "priceAmount": 2100,
+        "description": "6 hours room access with work desk, coffee, and quiet rest.",
+        "itemsIncluded": [
+          "6 Hours Room",
+          "Beverage Voucher",
+          "Work Desk Access"
+        ]
+      }
+    ],
+    "addons": [],
+    "timeSlots": [
+      {
+        "id": "ts_ch_morning",
+        "label": "Morning Slot (06:00 AM - 12:00 PM)",
+        "startTime": "06:00",
+        "endTime": "12:00",
+        "priceAmount": 1800,
+        "isAvailable": true
+      },
+      {
+        "id": "ts_ch_afternoon",
+        "label": "Afternoon Transit (12:00 PM - 06:00 PM)",
+        "startTime": "12:00",
+        "endTime": "18:00",
+        "priceAmount": 2100,
+        "isAvailable": true
+      },
+      {
+        "id": "ts_ch_night",
+        "label": "Night Layover (08:00 PM - 08:00 AM)",
+        "startTime": "20:00",
+        "endTime": "08:00",
+        "priceAmount": 2800,
+        "isAvailable": true
+      }
+    ],
+    "contactPhone": "+91 91234 56789",
+    "contactWhatsapp": "919123456789",
+    "locationHierarchy": {
+      "state": "Telangana",
+      "district": "Hyderabad",
+      "city": "Hyderabad",
+      "area": "Jubilee Hills / Banjara Hills",
+      "pincode": "500033",
+      "fullAddressText": "Road No 36, Jubilee Hills, Hyderabad, Telangana 500033"
+    },
+    "ownerId": "user_venue_owner",
+    "categoryId": "cat_hourly"
+  },
+  {
+    "id": "v_zenith_academy",
+    "name": "Zenith Tech Hub & Modern Classroom Academy",
+    "slug": "zenith-tech-hub-academy",
+    "description": "Acoustically treated, smart interactive classroom and seminar hall with 4K touch display, dual projectors, ergonomic lecture chairs, and high-speed dedicated fiber network for training batches and seminars.",
+    "addressLine1": "Cyber Towers Road, Hitec City",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "latitude": 17.4504,
+    "longitude": 78.3808,
+    "capacity": 65,
+    "minGuests": 10,
+    "maxGuests": 75,
+    "distanceKm": 3.2,
+    "pricingBaseAmount": 1200,
+    "taxRate": 18,
+    "parkingCapacity": 45,
+    "foodOptions": "Cafeteria with Tea/Coffee Vending & Boxed Lunch Catering",
+    "rules": "Classroom equipment to be operated by qualified faculty. No open food inside main hall.",
+    "isVerified": true,
+    "isActive": true,
+    "status": "APPROVED",
+    "avgRating": 4.88,
+    "ratingCount": 160,
+    "category": {
+      "id": "cat_coaching",
+      "slug": "coaching",
+      "name": "Classes & Coaching",
+      "iconName": "school",
+      "icon": "🎓",
+      "isActive": true,
+      "isUnifiedRegistrationEnabled": true,
+      "parentSection": "institutes_classes"
+    },
+    "isSaved": false,
+    "featuredImageUrl": "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=1200&q=80",
+    "images": [
+      {
+        "id": "img_za_1",
+        "url": "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=1200&q=80",
+        "altText": "Smart Interactive Classroom",
+        "isCover": true
+      },
+      {
+        "id": "img_za_2",
+        "url": "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1200&q=80",
+        "altText": "Students Seminar Hall",
+        "isCover": false
+      }
+    ],
+    "facilities": [
+      {
+        "facility": "75-inch 4K Interactive Smart Whiteboard",
+        "isAvailable": true
+      },
+      {
+        "facility": "500 Mbps Dedicated Symmetric Leased Line",
+        "isAvailable": true
+      },
+      {
+        "facility": "Surround Wireless Collar & Handheld Mics",
+        "isAvailable": true
+      },
+      {
+        "facility": "Full AC with Ergonomic Writing Desks",
+        "isAvailable": true
+      }
+    ],
+    "packages": [
+      {
+        "id": "pkg_za_halfday",
+        "name": "Half-Day Workshop (4 Hours)",
+        "priceAmount": 4500,
+        "description": "4 hours smart classroom booking with all AV & projection tools.",
+        "itemsIncluded": [
+          "4-Hour Slot",
+          "AV & Smart Screen",
+          "High-Speed Wi-Fi",
+          "Tea/Coffee"
+        ]
+      },
+      {
+        "id": "pkg_za_fullday",
+        "name": "Full-Day Corporate Training (8 Hours)",
+        "priceAmount": 8500,
+        "description": "8 hours seminar hall access with technical assistant on site.",
+        "itemsIncluded": [
+          "8-Hour Hall Access",
+          "Technical Sound Tech",
+          "Whiteboard Pens",
+          "Air Conditioning"
+        ]
+      }
+    ],
+    "addons": [],
+    "timeSlots": [
+      {
+        "id": "ts_za_morning",
+        "label": "Morning Session (09:00 AM - 01:00 PM)",
+        "startTime": "09:00",
+        "endTime": "13:00",
+        "priceAmount": 4500,
+        "isAvailable": true
+      },
+      {
+        "id": "ts_za_afternoon",
+        "label": "Afternoon Session (02:00 PM - 06:00 PM)",
+        "startTime": "14:00",
+        "endTime": "18:00",
+        "priceAmount": 4500,
+        "isAvailable": true
+      }
+    ],
+    "contactPhone": "+91 93456 78901",
+    "contactWhatsapp": "919345678901",
+    "locationHierarchy": {
+      "state": "Telangana",
+      "district": "Hyderabad",
+      "city": "Hyderabad",
+      "area": "Gachibowli / Hitec City",
+      "pincode": "500081",
+      "fullAddressText": "Financial District, Gachibowli, Hyderabad, Telangana 500081"
+    },
+    "ownerId": "user_venue_owner",
+    "categoryId": "cat_coaching"
+  },
+  {
+    "id": "v_rhythm_dance_studio",
+    "name": "Rhythm & Beats Performing Arts & Dance Studio",
+    "slug": "rhythm-beats-dance-studio",
+    "description": "1,800 sq.ft state-of-the-art rehearsal studio with shock-absorbing hardwood flooring, floor-to-ceiling mirror walls, dynamic RGB ceiling mood lighting, and high-fidelity JBL studio monitors for dance, theatre, and yoga.",
+    "addressLine1": "Road No 10, Banjara Hills",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "latitude": 17.4156,
+    "longitude": 78.4354,
+    "capacity": 45,
+    "minGuests": 2,
+    "maxGuests": 50,
+    "distanceKm": 2.8,
+    "pricingBaseAmount": 850,
+    "taxRate": 18,
+    "parkingCapacity": 25,
+    "foodOptions": "Hydration Bar with Coconut Water & Cold Brews",
+    "rules": "Dance shoes or bare feet only on wooden floors. Strictly no street footwear.",
+    "isVerified": true,
+    "isActive": true,
+    "status": "APPROVED",
+    "avgRating": 4.89,
+    "ratingCount": 220,
+    "category": {
+      "id": "cat_dance",
+      "slug": "dance_studio",
+      "name": "Studios & Dance",
+      "iconName": "music_note",
+      "icon": "💃",
+      "isActive": true,
+      "isUnifiedRegistrationEnabled": true,
+      "parentSection": "institutes_classes"
+    },
+    "isSaved": true,
+    "featuredImageUrl": "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=1200&q=80",
+    "images": [
+      {
+        "id": "img_rd_1",
+        "url": "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=1200&q=80",
+        "altText": "Wooden Floor Dance Studio with Mirrors",
+        "isCover": true
+      },
+      {
+        "id": "img_rd_2",
+        "url": "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=1200&q=80",
+        "altText": "RGB Mood Ambient Lighting",
+        "isCover": false
+      }
+    ],
+    "facilities": [
+      {
+        "facility": "Sprung Hardwood Floor (Shock Absorbent)",
+        "isAvailable": true
+      },
+      {
+        "facility": "Wall-to-Wall 8-ft Dance Mirrors",
+        "isAvailable": true
+      },
+      {
+        "facility": "JBL Studio Audio Rig with Bluetooth 5.2",
+        "isAvailable": true
+      },
+      {
+        "facility": "Changing Rooms with Lockers",
+        "isAvailable": true
+      }
+    ],
+    "packages": [
+      {
+        "id": "pkg_rd_1h",
+        "name": "1-Hour Rehearsal Slot",
+        "priceAmount": 850,
+        "description": "Full studio access for 1 hour for up to 15 performers.",
+        "itemsIncluded": [
+          "Studio Access",
+          "Audio Rig",
+          "Air Conditioning"
+        ]
+      },
+      {
+        "id": "pkg_rd_block",
+        "name": "Choreography Block (4 Hours)",
+        "priceAmount": 3000,
+        "description": "4-hour dedicated slot for dance shoots or intensive workshops.",
+        "itemsIncluded": [
+          "4 Hours Rehearsal",
+          "Changing Rooms",
+          "Lighting Control"
+        ]
+      }
+    ],
+    "addons": [],
+    "timeSlots": [
+      {
+        "id": "ts_rd_morning",
+        "label": "Morning Slot (07:00 AM - 08:00 AM)",
+        "startTime": "07:00",
+        "endTime": "08:00",
+        "priceAmount": 800,
+        "isAvailable": true
+      },
+      {
+        "id": "ts_rd_prime",
+        "label": "Prime Evening (06:00 PM - 07:00 PM)",
+        "startTime": "18:00",
+        "endTime": "19:00",
+        "priceAmount": 950,
+        "isAvailable": true
+      },
+      {
+        "id": "ts_rd_night",
+        "label": "Night Jam (08:00 PM - 09:00 PM)",
+        "startTime": "20:00",
+        "endTime": "21:00",
+        "priceAmount": 850,
+        "isAvailable": true
+      }
+    ],
+    "contactPhone": "+91 98123 45678",
+    "contactWhatsapp": "919812345678",
+    "locationHierarchy": {
+      "state": "Telangana",
+      "district": "Hyderabad",
+      "city": "Hyderabad",
+      "area": "Jubilee Hills / Banjara Hills",
+      "pincode": "500033",
+      "fullAddressText": "Road No 36, Jubilee Hills, Hyderabad, Telangana 500033"
+    },
+    "ownerId": "user_venue_owner",
+    "categoryId": "cat_dance"
+  },
+  {
+    "id": "v_hitex_expo_center",
+    "name": "Hitex Grand Exhibition & Mega Expo Arena",
+    "slug": "hitex-grand-expo-arena",
+    "description": "Colossal 25,000 sq.ft clear-span exhibition pavilion with 30-ft ceiling height, roll-up drive-in freight shutters, heavy-duty floor loading, VIP lounges, and visitor parking for mega expos, trade shows, and brand launches.",
+    "addressLine1": "Hitex Exhibition Center, Izzat Nagar",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "latitude": 17.4722,
+    "longitude": 78.3758,
+    "capacity": 3500,
+    "minGuests": 300,
+    "maxGuests": 5000,
+    "distanceKm": 5.8,
+    "pricingBaseAmount": 65000,
+    "taxRate": 18,
+    "parkingCapacity": 1200,
+    "foodOptions": "Multiple Dedicated Food Courts & Outdoor Vendor Stall Bays",
+    "rules": "Stall construction follows National Building Code. Emergency exit lanes kept clear.",
+    "isVerified": true,
+    "isActive": true,
+    "status": "APPROVED",
+    "avgRating": 4.93,
+    "ratingCount": 540,
+    "category": {
+      "id": "cat_events",
+      "slug": "events",
+      "name": "Events & Expos",
+      "iconName": "event",
+      "icon": "🎟️",
+      "isActive": true,
+      "isUnifiedRegistrationEnabled": false,
+      "parentSection": "function_halls"
+    },
+    "isSaved": true,
+    "featuredImageUrl": "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80",
+    "images": [
+      {
+        "id": "img_he_1",
+        "url": "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80",
+        "altText": "Grand Exhibition Hall Stalls",
+        "isCover": true
+      },
+      {
+        "id": "img_he_2",
+        "url": "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=80",
+        "altText": "Conference & Stage Lighting",
+        "isCover": false
+      }
+    ],
+    "facilities": [
+      {
+        "facility": "Clear-Span Column-Free 25,000 sq.ft Hall",
+        "isAvailable": true
+      },
+      {
+        "facility": "Heavy Equipment Drive-in Loading Bays",
+        "isAvailable": true
+      },
+      {
+        "facility": "100% Redundant Genset Power (500 KVA)",
+        "isAvailable": true
+      },
+      {
+        "facility": "Parking for 1,200+ Cars and Buses",
+        "isAvailable": true
+      }
+    ],
+    "packages": [
+      {
+        "id": "pkg_he_day",
+        "name": "1-Day Expo Hall Rental (8 AM - 10 PM)",
+        "priceAmount": 65000,
+        "description": "Complete exhibition arena with entry registration foyer and power supply.",
+        "itemsIncluded": [
+          "Hall Access",
+          "Power Generator Fuel",
+          "Security Marshals",
+          "Basic Lighting"
+        ]
+      }
+    ],
+    "addons": [],
+    "timeSlots": [
+      {
+        "id": "ts_he_fullday",
+        "label": "Full Day Event (08:00 AM - 10:00 PM)",
+        "startTime": "08:00",
+        "endTime": "22:00",
+        "priceAmount": 65000,
+        "isAvailable": true
+      }
+    ],
+    "contactPhone": "+91 40 2311 2121",
+    "contactWhatsapp": "914023112121",
+    "locationHierarchy": {
+      "state": "Telangana",
+      "district": "Hyderabad",
+      "city": "Hyderabad",
+      "area": "Gachibowli / Hitec City",
+      "pincode": "500081",
+      "fullAddressText": "Financial District, Gachibowli, Hyderabad, Telangana 500081"
+    },
+    "ownerId": "user_venue_owner",
+    "categoryId": "cat_events"
+  },
+  {
+    "id": "v_innov8_coworking",
+    "name": "Innov8 Hub - Dedicated Desks & Boardrooms",
+    "slug": "innov8-hub-coworking",
+    "description": "Modern collaborative workspace with ergonomic Herman Miller seating, ultra-fast 1 Gbps internet, soundproof phone booths, unlimited craft coffee, and 12-seater tech-equipped conference boardrooms.",
+    "addressLine1": "Financial District, Nanakramguda",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "latitude": 17.4168,
+    "longitude": 78.3448,
+    "capacity": 150,
+    "minGuests": 1,
+    "maxGuests": 40,
+    "distanceKm": 4.6,
+    "pricingBaseAmount": 450,
+    "taxRate": 18,
+    "parkingCapacity": 80,
+    "foodOptions": "Artisan Espresso Bar, Snack Pantry & Rooftop Cafe",
+    "rules": "Quiet zones maintained in open workspaces. Conference rooms booked in 1-hour slots.",
+    "isVerified": true,
+    "isActive": true,
+    "status": "APPROVED",
+    "avgRating": 4.87,
+    "ratingCount": 395,
+    "category": {
+      "id": "cat_coworking",
+      "slug": "co_working",
+      "name": "Co-Working & Desks",
+      "iconName": "work",
+      "icon": "💼",
+      "isActive": true,
+      "isUnifiedRegistrationEnabled": true,
+      "parentSection": "sports_workspaces"
+    },
+    "isSaved": true,
+    "featuredImageUrl": "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80",
+    "images": [
+      {
+        "id": "img_in_1",
+        "url": "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80",
+        "altText": "Sleek Co-Working Open Desks",
+        "isCover": true
+      },
+      {
+        "id": "img_in_2",
+        "url": "https://images.unsplash.com/photo-1517502884422-41eaead166d4?auto=format&fit=crop&w=1200&q=80",
+        "altText": "Glass Boardroom & Video Conferencing",
+        "isCover": false
+      }
+    ],
+    "facilities": [
+      {
+        "facility": "High-Speed 1 Gbps Redundant Leased Lines",
+        "isAvailable": true
+      },
+      {
+        "facility": "Ergonomic Mesh Seating & Standing Desks",
+        "isAvailable": true
+      },
+      {
+        "facility": "Unlimited Artisan Coffee & Green Tea",
+        "isAvailable": true
+      },
+      {
+        "facility": "Soundproof Call Pods & Video Meeting Rooms",
+        "isAvailable": true
+      }
+    ],
+    "packages": [
+      {
+        "id": "pkg_in_daypass",
+        "name": "1-Day Hot Desk Pass",
+        "priceAmount": 450,
+        "description": "Unlimited hot desk access for 1 person with coffee and high-speed Wi-Fi.",
+        "itemsIncluded": [
+          "Hot Desk Access (9 AM - 8 PM)",
+          "Unlimited Coffee & Water",
+          "1 Gbps Wi-Fi",
+          "Phone Pod Access"
+        ]
+      },
+      {
+        "id": "pkg_in_boardroom",
+        "name": "4-Hour Executive Boardroom Pass",
+        "priceAmount": 2800,
+        "description": "12-seater glass boardroom with 4K display and Polycom conference mic.",
+        "itemsIncluded": [
+          "4-Hour Boardroom",
+          "Video Conferencing AV",
+          "Whiteboard",
+          "Beverage Service"
+        ]
+      }
+    ],
+    "addons": [],
+    "timeSlots": [
+      {
+        "id": "ts_in_day",
+        "label": "Full Day Pass (09:00 AM - 08:00 PM)",
+        "startTime": "09:00",
+        "endTime": "20:00",
+        "priceAmount": 450,
+        "isAvailable": true
+      },
+      {
+        "id": "ts_in_boardroom_morning",
+        "label": "Boardroom Slot (10:00 AM - 02:00 PM)",
+        "startTime": "10:00",
+        "endTime": "14:00",
+        "priceAmount": 2800,
+        "isAvailable": true
+      }
+    ],
+    "contactPhone": "+91 40 4848 1000",
+    "contactWhatsapp": "914048481000",
+    "locationHierarchy": {
+      "state": "Telangana",
+      "district": "Hyderabad",
+      "city": "Hyderabad",
+      "area": "Gachibowli / Hitec City",
+      "pincode": "500081",
+      "fullAddressText": "Financial District, Gachibowli, Hyderabad, Telangana 500081"
+    },
+    "ownerId": "user_venue_owner",
+    "categoryId": "cat_coworking"
+  },
+  {
+    "id": "v_krishna_convention",
+    "name": "Sri Krishna Grand Convention Centre & Royal Mandapam",
+    "slug": "sri-krishna-grand-convention-centre",
+    "description": "Premier air-conditioned convention center designed for grand luxury weddings, receptions, and corporate conferences with hydraulic stage, crystal chandeliers, 1200-seat main hall, and 600-seat dedicated vegetarian dining plaza.",
+    "addressLine1": "Financial District, Gachibowli",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "latitude": 17.424,
+    "longitude": 78.349,
+    "capacity": 1500,
+    "minGuests": 200,
+    "maxGuests": 2500,
+    "distanceKm": 2.4,
+    "pricingBaseAmount": 140000,
+    "taxRate": 18,
+    "parkingCapacity": 400,
+    "foodOptions": "Both Pure Veg & Multi-Cuisine Premium Kitchens with dedicated banquet servers",
+    "rules": "DJ and orchestra permitted until 11:30 PM. Complete generator power backup included.",
+    "isVerified": true,
+    "isActive": true,
+    "status": "APPROVED",
+    "avgRating": 4.88,
+    "ratingCount": 342,
+    "category": {
+      "id": "cat_convention",
+      "slug": "convention_center",
+      "name": "Convention Centers",
+      "iconName": "domain",
+      "icon": "🏢",
+      "isActive": true,
+      "isUnifiedRegistrationEnabled": true,
+      "parentSection": "function_halls"
+    },
+    "isSaved": false,
+    "featuredImageUrl": "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1200&q=80",
+    "images": [
+      {
+        "id": "img_kc_1",
+        "url": "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1200&q=80",
+        "altText": "Grand Convention Hall Interior",
+        "isCover": true
+      },
+      {
+        "id": "img_kc_2",
+        "url": "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=1200&q=80",
+        "altText": "Illuminated Royal Stage Arch",
+        "isCover": false
+      }
+    ],
+    "facilities": [
+      {
+        "facility": "Central Air Conditioning (1500 Capacity)",
+        "isAvailable": true
+      },
+      {
+        "facility": "Hydraulic Wedding Dais Stage & LED Wall",
+        "isAvailable": true
+      },
+      {
+        "facility": "8 AC Green Rooms & Bridal Suites",
+        "isAvailable": true
+      },
+      {
+        "facility": "Valet Parking for 400 Cars",
+        "isAvailable": true
+      }
+    ],
+    "packages": [
+      {
+        "id": "pkg_kc_day",
+        "name": "Grand Wedding & Reception Day Pass",
+        "priceAmount": 140000,
+        "description": "Convention hall, bridal suites, dining area and sound setup.",
+        "itemsIncluded": [
+          "Full Day Access",
+          "Bridal Suites",
+          "Stage Lighting",
+          "Security Team"
+        ]
+      }
+    ],
+    "addons": [],
+    "timeSlots": [
+      {
+        "id": "ts_kc_full",
+        "label": "Full Day Muhurtham & Reception (06:00 AM - 11:30 PM)",
+        "startTime": "06:00",
+        "endTime": "23:30",
+        "priceAmount": 140000,
+        "isAvailable": true
+      },
+      {
+        "id": "ts_kc_eve",
+        "label": "Evening Reception Slot (04:00 PM - 11:30 PM)",
+        "startTime": "16:00",
+        "endTime": "23:30",
+        "priceAmount": 90000,
+        "isAvailable": true
+      }
+    ],
+    "contactPhone": "+91 94401 23456",
+    "contactWhatsapp": "919440123456",
+    "locationHierarchy": {
+      "state": "Telangana",
+      "district": "Hyderabad",
+      "city": "Hyderabad",
+      "area": "Gachibowli / Hitec City",
+      "pincode": "500081",
+      "fullAddressText": "Financial District, Gachibowli, Hyderabad, Telangana 500081"
+    },
+    "ownerId": "user_venue_owner",
+    "categoryId": "cat_convention"
+  },
+  {
+    "id": "v_lotus_mini_hall",
+    "name": "Lotus Grand AC Mini Function Hall & Dining",
+    "slug": "lotus-grand-mini-function-hall",
+    "description": "Chic and intimate air-conditioned mini function hall ideal for engagements, birthdays, baby showers, Upanayanam, and small family gatherings of up to 300 guests with private dining and audio system.",
+    "addressLine1": "Trunk Road, Near RTC Complex",
+    "city": "Ongole",
+    "state": "Andhra Pradesh",
+    "latitude": 15.505,
+    "longitude": 80.048,
+    "capacity": 250,
+    "minGuests": 40,
+    "maxGuests": 350,
+    "distanceKm": 0.8,
+    "pricingBaseAmount": 25000,
+    "taxRate": 18,
+    "parkingCapacity": 60,
+    "foodOptions": "Catering allowed, in-house buffet tables & warmers provided",
+    "rules": "No smoking. Events permitted until 11:00 PM.",
+    "isVerified": true,
+    "isActive": true,
+    "status": "APPROVED",
+    "avgRating": 4.7,
+    "ratingCount": 128,
+    "category": {
+      "id": "cat_mini_function",
+      "slug": "mini_function_hall",
+      "name": "Mini Function Halls",
+      "iconName": "star",
+      "icon": "✨",
+      "isActive": true,
+      "isUnifiedRegistrationEnabled": true,
+      "parentSection": "function_halls"
+    },
+    "isSaved": false,
+    "featuredImageUrl": "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1200&q=80",
+    "images": [
+      {
+        "id": "img_lm_1",
+        "url": "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1200&q=80",
+        "altText": "Intimate AC Hall Setup",
+        "isCover": true
+      }
+    ],
+    "facilities": [
+      {
+        "facility": "Fully Air-Conditioned Hall (250 seats)",
+        "isAvailable": true
+      },
+      {
+        "facility": "Buffet Dining Hall (120 seats)",
+        "isAvailable": true
+      },
+      {
+        "facility": "Wireless Microphones & Sound System",
+        "isAvailable": true
+      },
+      {
+        "facility": "2 AC Changing Rooms",
+        "isAvailable": true
+      }
+    ],
+    "packages": [
+      {
+        "id": "pkg_lm_std",
+        "name": "4-Hour Party Package",
+        "priceAmount": 25000,
+        "description": "Includes hall, dining space, sound, and clean-up.",
+        "itemsIncluded": [
+          "4 Hours Slot",
+          "Sound & Mic",
+          "Air Conditioning"
+        ]
+      }
+    ],
+    "addons": [],
+    "timeSlots": [
+      {
+        "id": "ts_lm_morn",
+        "label": "Morning Slot (09:00 AM - 02:00 PM)",
+        "startTime": "09:00",
+        "endTime": "14:00",
+        "priceAmount": 25000,
+        "isAvailable": true
+      },
+      {
+        "id": "ts_lm_eve",
+        "label": "Evening Slot (05:00 PM - 10:30 PM)",
+        "startTime": "17:00",
+        "endTime": "22:30",
+        "priceAmount": 28000,
+        "isAvailable": true
+      }
+    ],
+    "contactPhone": "+91 86861 99887",
+    "contactWhatsapp": "918686199887",
+    "locationHierarchy": {
+      "state": "Andhra Pradesh",
+      "district": "Prakasam",
+      "city": "Ongole",
+      "area": "Gandhi Road / Trunk Road",
+      "pincode": "523001",
+      "fullAddressText": "Trunk Road, Near RTC Complex, Ongole, Andhra Pradesh 523001"
+    },
+    "ownerId": "user_venue_owner",
+    "categoryId": "cat_mini_function"
+  },
+  {
+    "id": "v_emerald_lawns",
+    "name": "Emerald Royal Lawns & Open-Air Function Grounds",
+    "slug": "emerald-royal-lawns",
+    "description": "Expansive lush green open-air party lawn with illuminated gazebo, floral pergolas, and fairy light canopy for romantic outdoor wedding receptions, sangeets, and cocktail dinners.",
+    "addressLine1": "Road No 36, Jubilee Hills",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "latitude": 17.435,
+    "longitude": 78.409,
+    "capacity": 800,
+    "minGuests": 150,
+    "maxGuests": 1200,
+    "distanceKm": 3.1,
+    "pricingBaseAmount": 75000,
+    "taxRate": 18,
+    "parkingCapacity": 150,
+    "foodOptions": "Live barbecue counters, tandoor stations & live dessert counters permitted",
+    "rules": "Live sound permitted till 10:00 PM, ambient background music till 11:30 PM.",
+    "isVerified": true,
+    "isActive": true,
+    "status": "APPROVED",
+    "avgRating": 4.82,
+    "ratingCount": 195,
+    "category": {
+      "id": "cat_party_hall",
+      "slug": "party_hall",
+      "name": "Party Halls & Lawns",
+      "iconName": "deck",
+      "icon": "🎈",
+      "isActive": true,
+      "isUnifiedRegistrationEnabled": true,
+      "parentSection": "function_halls"
+    },
+    "isSaved": true,
+    "featuredImageUrl": "https://images.unsplash.com/photo-1545232979-fbf6a8c3d9b0?auto=format&fit=crop&w=1200&q=80",
+    "images": [
+      {
+        "id": "img_el_1",
+        "url": "https://images.unsplash.com/photo-1545232979-fbf6a8c3d9b0?auto=format&fit=crop&w=1200&q=80",
+        "altText": "Open Lawn with Night Fairy Lights",
+        "isCover": true
+      }
+    ],
+    "facilities": [
+      {
+        "facility": "25,000 sq ft Manicured Korean Grass Lawn",
+        "isAvailable": true
+      },
+      {
+        "facility": "Stage with Weatherproof Trusses & Spotlights",
+        "isAvailable": true
+      },
+      {
+        "facility": "Covered Buffet Food Dining Pavilion",
+        "isAvailable": true
+      },
+      {
+        "facility": "Bridal Villa with 2 Deluxe AC Rooms",
+        "isAvailable": true
+      }
+    ],
+    "packages": [
+      {
+        "id": "pkg_el_sangeet",
+        "name": "Evening Sangeet / Reception Lawn (6 Hours)",
+        "priceAmount": 75000,
+        "description": "Full open-air lawn with fairy lights and bridal villa.",
+        "itemsIncluded": [
+          "Lawn Access",
+          "Fairy Light Canopy",
+          "Bridal Villa",
+          "Valet Team"
+        ]
+      }
+    ],
+    "addons": [],
+    "timeSlots": [
+      {
+        "id": "ts_el_eve",
+        "label": "Evening Lawn Slot (05:00 PM - 11:30 PM)",
+        "startTime": "17:00",
+        "endTime": "23:30",
+        "priceAmount": 75000,
+        "isAvailable": true
+      }
+    ],
+    "contactPhone": "+91 98850 77665",
+    "contactWhatsapp": "919885077665",
+    "locationHierarchy": {
+      "state": "Telangana",
+      "district": "Hyderabad",
+      "city": "Hyderabad",
+      "area": "Jubilee Hills / Banjara Hills",
+      "pincode": "500033",
+      "fullAddressText": "Road No 36, Jubilee Hills, Hyderabad, Telangana 500033"
+    },
+    "ownerId": "user_venue_owner",
+    "categoryId": "cat_party_hall"
+  }
+]

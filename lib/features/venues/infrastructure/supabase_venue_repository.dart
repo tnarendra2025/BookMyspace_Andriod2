@@ -186,8 +186,8 @@ class SupabaseVenueRepository implements VenueRepository {
   @override
   Future<List<Venue>> search(VenueSearchQuery query) async {
     try {
-      String? categoryId;
-      if (query.categorySlug != null) {
+      String? categoryId = query.categoryId;
+      if (categoryId == null && query.categorySlug != null) {
         final catRow = await _client
             .from('venue_categories')
             .select('id')
@@ -196,8 +196,9 @@ class SupabaseVenueRepository implements VenueRepository {
         categoryId = catRow?['id'] as String?;
       }
 
+      final hasCategoryFilter = categoryId != null || query.categorySlug != null;
       // Use inner join syntax on venue_categories when filtering by category to avoid PostgREST 42803 grouping errors
-      final selectClause = (query.categorySlug != null)
+      final selectClause = hasCategoryFilter
           ? '''
             *,
             venue_categories!inner (id, slug, name, icon),
@@ -214,7 +215,7 @@ class SupabaseVenueRepository implements VenueRepository {
         builder = builder.textSearch('search_document', query.query.trim());
       }
       if (categoryId != null && categoryId.isNotEmpty) {
-        // Explicitly cast category_id UUID parameter for PostgREST
+        // Optimized: category_id passed directly as filter parameter to database query
         builder = builder.filter('category_id', 'eq', categoryId);
       }
       if (query.city != null && query.city!.trim().isNotEmpty) {
@@ -238,7 +239,7 @@ class SupabaseVenueRepository implements VenueRepository {
       };
 
       // Log exact SQL executed for function hall / category searches
-      if (query.categorySlug != null) {
+      if (categoryId != null || query.categorySlug != null) {
         final executedSql = "SELECT $selectClause FROM venues WHERE is_active = true"
             " AND category_id = '${categoryId ?? ''}'::uuid"
             "${query.query.trim().isNotEmpty ? " AND search_document @@ to_tsquery('${query.query.trim()}')" : ""}"
@@ -260,6 +261,36 @@ class SupabaseVenueRepository implements VenueRepository {
           .toList();
     } catch (e) {
       throw mapError(e);
+    }
+  }
+
+  @override
+  Future<List<Venue>> fetchVenuesByCategory({
+    required String categoryId,
+    int limit = 50,
+  }) async {
+    try {
+      // Optimized database query passing category_id as filter parameter
+      final rows = await _client
+          .from('venues')
+          .select('''
+            *,
+            venue_categories!inner (id, slug, name, icon),
+            venue_images (id, url, thumbnail_url, alt_text, is_cover, sort_order)
+          ''')
+          .eq('is_active', true)
+          .filter('category_id', 'eq', categoryId)
+          .order('avg_rating', ascending: false)
+          .order('rating_count', ascending: false)
+          .limit(limit);
+
+      return rows
+          .whereType<Map<String, dynamic>>()
+          .map(Venue.fromJson)
+          .toList();
+    } catch (e) {
+      // Fallback to search query method with categoryId filter parameter
+      return search(VenueSearchQuery(categoryId: categoryId));
     }
   }
 

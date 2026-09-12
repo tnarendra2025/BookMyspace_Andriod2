@@ -34,6 +34,10 @@ abstract class VenueRepository {
   /// Search venues by query and filters.
   Future<List<Venue>> search(VenueSearchQuery query);
 
+  /// Efficiently fetches category-based listings directly from backend database
+  /// passing category_id as filter parameter.
+  Future<List<Venue>> fetchVenuesByCategory({required String categoryId, int limit = 50});
+
   /// Get single venue by ID with full details.
   Future<Venue> venueById(String id);
 

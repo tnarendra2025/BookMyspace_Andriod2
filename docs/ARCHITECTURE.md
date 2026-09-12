@@ -53,3 +53,34 @@ data/infrastructure layers.
 - Queue-based async processing (notifications, webhooks).
 
 See [ROADMAP.md](ROADMAP.md) for milestone status.
+
+---
+
+## Centralized Backend Integration Layer (Sections 65–99)
+
+External-site, MCP, and API integrations are strictly architected as a **backend integration layer**, never called directly from Flutter screens:
+
+```text
+Flutter UI (iOS / Android / Web)
+   ↓
+Feature / Domain Layer
+   ↓
+Integration Repository
+   ↓
+Supabase Edge Function / Secure Backend API
+   ↓
+External API / Website / MCP / Webhook
+   ↓
+Normalized BookMySpace Response
+   ↓
+Flutter State (Riverpod)
+   ↓
+Consistent Multi-Platform UI
+```
+
+### Key Integration Rules:
+1. **No Direct Flutter Calls**: All external API credentials, client secrets, and authentication tokens live in secure backend environment / secret storage.
+2. **Official Paths Only**: If an external website has no official API, MCP server, or SDK, do NOT scrape or invent endpoints. Use official deep-link/website handoff ("Continue on partner website") or mark the integration unavailable.
+3. **Data Normalization**: External models (`ExternalVenue`, `ExternalBooking`) are mapped into normalized BookMySpace domain entities before reaching client state.
+4. **Resilience & Circuit Breaking**: If an external provider fails or rate-limits, core BookMySpace functionality continues operating without crashing.
+

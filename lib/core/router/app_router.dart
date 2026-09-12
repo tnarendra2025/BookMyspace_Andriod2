@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/admin/presentation/screens/admin_audit_screen.dart';
+import '../../features/admin/presentation/screens/admin_integrations_screen.dart';
+import '../../features/admin/presentation/screens/admin_mcp_screen.dart';
 import '../../features/analytics/presentation/screens/analytics_screen.dart';
 import '../../features/auth/domain/auth_user.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
@@ -59,6 +61,8 @@ abstract class AppRoutes {
   static const analytics = '/analytics';
   static const support = '/support';
   static const adminAudit = '/admin/audit';
+  static const adminIntegrations = '/admin/integrations';
+  static const adminMcp = '/admin/mcp';
   static const ownerRegistration = '/owner/register';
   static const ownerDashboard = '/owner';
   static const ownerCategories = '/owner/categories';
@@ -221,6 +225,16 @@ GoRouter createAppRouter({
         builder: (context, state) => const AdminAuditScreen(),
       ),
       GoRoute(
+        path: AppRoutes.adminIntegrations,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const AdminIntegrationsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.adminMcp,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const AdminMcpScreen(),
+      ),
+      GoRoute(
         path: AppRoutes.ownerRegistration,
         parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) => const OwnerRegistrationScreen(),
@@ -292,6 +306,14 @@ GoRouter createAppRouter({
           StatefulShellBranch(
             routes: [
               GoRoute(
+                path: AppRoutes.notifications,
+                builder: (context, state) => const NotificationsScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
                 path: AppRoutes.search,
                 builder: (context, state) {
                   final extra = state.extra;
@@ -314,8 +336,8 @@ GoRouter createAppRouter({
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: AppRoutes.saved,
-                builder: (context, state) => const SavedScreen(),
+                path: AppRoutes.coursesList,
+                builder: (context, state) => const CoursesListScreen(),
               ),
             ],
           ),

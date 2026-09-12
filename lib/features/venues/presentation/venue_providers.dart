@@ -65,6 +65,14 @@ final searchResultsProvider = FutureProvider<List<Venue>>((ref) {
   return ref.watch(venueRepositoryProvider).search(query);
 });
 
+/// Category-based venue fetch service provider passing category_id as filter parameter
+final venuesByCategoryIdProvider = FutureProvider.family<List<Venue>, String>((
+  ref,
+  categoryId,
+) {
+  return ref.watch(venueRepositoryProvider).fetchVenuesByCategory(categoryId: categoryId);
+});
+
 /// Venue details provider by venue ID.
 final venueDetailsProvider = FutureProvider.autoDispose.family<Venue, String>((
   ref,

@@ -22,6 +22,7 @@ import {
   Database,
   Terminal,
   RefreshCw,
+  Zap,
 } from 'lucide-react';
 
 export const AdminSettingsScreen: React.FC = () => {
@@ -289,10 +290,25 @@ export const AdminSettingsScreen: React.FC = () => {
 
         {/* Section 4: Live Feature Flags Matrix */}
         <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-4">
-          <h3 className="text-sm font-black text-slate-900 flex items-center gap-2">
-            <Sliders className="w-4 h-4 text-indigo-600" />
-            Core Runtime Feature Toggles
-          </h3>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <h3 className="text-sm font-black text-slate-900 flex items-center gap-2">
+                <Sliders className="w-4 h-4 text-indigo-600" />
+                Core Runtime Feature Toggles
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Baseline client switches. For zero-redeploy microservices and backend JSON configurations, use the Hub.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setActiveScreen('admin-plug-play')}
+              className="px-3.5 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 self-start sm:self-auto"
+            >
+              <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />
+              <span>Open Plug-and-Play Features Hub →</span>
+            </button>
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             {featureToggles.map((flag) => (

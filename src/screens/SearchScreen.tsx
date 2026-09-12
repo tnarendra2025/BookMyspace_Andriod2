@@ -11,14 +11,28 @@ import {
   Users,
   Star,
   Sparkles,
+  ArrowLeft,
+  RotateCcw,
+  Database,
+  RefreshCw,
+  Server,
+  Zap,
+  Navigation,
+  CheckCircle2,
+  TrendingUp,
 } from 'lucide-react';
-import { SAMPLE_CATEGORIES } from '../data/mockData';
+import { SAMPLE_CATEGORIES, FUNCTION_HALL_CATEGORIES, isFunctionHallCategory, FUNCTION_HALL_RELATED_SLUGS } from '../data/mockData';
 import { VenueCard } from './HomeScreen';
 import { CategoryIcon, getCategoryMeta } from '../components/CategoryIcon';
+import { VenueSortOption } from '../types';
 
 export const SearchScreen: React.FC = () => {
   const {
     venues,
+    backendFilteredVenues,
+    isVenuesLoading,
+    backendVenueQueryInfo,
+    fetchVenuesByBackendCategory,
     searchQuery,
     setSearchQuery,
     selectedCategoryId,
@@ -29,42 +43,85 @@ export const SearchScreen: React.FC = () => {
     setActiveScreen,
     setIsVoiceSearchOpen,
     allLocations,
+    selectedCity,
+    setSelectedCity,
+    sortBy,
+    setSortBy,
+    userCoordinates,
   } = useApp();
 
-  // Filters State
-  const [selectedCity, setSelectedCity] = useState<string>('All');
+  // Secondary Slider Filters State
   const [maxPrice, setMaxPrice] = useState<number>(350000);
   const [minCapacity, setMinCapacity] = useState<number>(0);
-  const [sortBy, setSortBy] = useState<'relevance' | 'price_low' | 'price_high' | 'rating'>('relevance');
   const [showFilterDrawer, setShowFilterDrawer] = useState<boolean>(false);
 
-  // Filter & Sort Logic
+  // Check if current category filter belongs to Function Halls domain
+  const isFunctionHallMode = useMemo(() => {
+    return isFunctionHallCategory(selectedCategoryId);
+  }, [selectedCategoryId]);
+
+  // Categories displayed in the strip: if function hall clicked, ONLY function hall related categories are displayed!
+  const displayedCategories = useMemo(() => {
+    if (isFunctionHallMode) {
+      return FUNCTION_HALL_CATEGORIES;
+    }
+    return SAMPLE_CATEGORIES;
+  }, [isFunctionHallMode]);
+
+  // Efficient backend query source: When backend results exist, use backend-retrieved listings
+  // where category_id, search, and intelligent multi-factor ranking were evaluated directly on the server database layer
+  const isUsingBackendResults = Boolean(backendFilteredVenues && backendFilteredVenues.length > 0);
+  const sourceVenues = useMemo(() => {
+    if (isUsingBackendResults && backendFilteredVenues) {
+      return backendFilteredVenues;
+    }
+    return venues;
+  }, [isUsingBackendResults, backendFilteredVenues, venues]);
+
+  // Filter & Sort Logic:
+  // When backendFilteredVenues is active, the backend has ALREADY performed category filtering,
+  // search querying, and intelligent multi-factor ranking (distance, popularity, availability).
+  // Redundant client-side filtering and sorting is completely avoided!
   const filteredResults = useMemo(() => {
+    if (isUsingBackendResults && backendFilteredVenues) {
+      // If user specified secondary in-memory budget/capacity sliders, filter without re-sorting
+      if (maxPrice < 350000 || minCapacity > 0) {
+        return backendFilteredVenues.filter((v) => {
+          if (v.pricingBaseAmount > maxPrice) return false;
+          if (minCapacity > 0 && v.capacity < minCapacity) return false;
+          return true;
+        });
+      }
+      return backendFilteredVenues;
+    }
+
+    // Local / offline fallback when backend is unavailable
     return venues.filter((v) => {
       // Must be approved or public
       if (v.status && v.status !== 'APPROVED') return false;
 
-      // Category match
-      if (selectedCategoryId !== 'all' && v.category.slug !== selectedCategoryId) {
-        if (!(selectedCategoryId === 'marriage_hall' && v.category.slug === 'function_hall')) {
-          return false;
+      // Fallback category match if backend did not filter (e.g. offline/cache)
+      if (selectedCategoryId !== 'all') {
+        if (selectedCategoryId === 'function_hall' || selectedCategoryId === 'all_function_halls') {
+          const isFhCategory = isFunctionHallCategory(v.category.slug) || v.category.parentSection === 'function_halls';
+          if (!isFhCategory) return false;
+        } else if (v.category.slug !== selectedCategoryId) {
+          if (!(selectedCategoryId === 'marriage_hall' && (v.category.slug === 'marriage_hall' || v.category.slug === 'function_hall'))) {
+            return false;
+          }
         }
       }
 
       // City filter
-      if (selectedCity !== 'All' && v.city.toLowerCase() !== selectedCity.toLowerCase()) {
+      if (selectedCity !== 'All' && selectedCity !== 'All Cities' && v.city.toLowerCase() !== selectedCity.toLowerCase()) {
         return false;
       }
 
       // Price filter
-      if (v.pricingBaseAmount > maxPrice) {
-        return false;
-      }
+      if (v.pricingBaseAmount > maxPrice) return false;
 
       // Capacity filter
-      if (minCapacity > 0 && v.capacity < minCapacity) {
-        return false;
-      }
+      if (minCapacity > 0 && v.capacity < minCapacity) return false;
 
       // Search Query
       if (searchQuery.trim()) {
@@ -84,9 +141,13 @@ export const SearchScreen: React.FC = () => {
       if (sortBy === 'price_low') return a.pricingBaseAmount - b.pricingBaseAmount;
       if (sortBy === 'price_high') return b.pricingBaseAmount - a.pricingBaseAmount;
       if (sortBy === 'rating') return b.avgRating - a.avgRating;
-      return 0; // relevance default
+      if (sortBy === 'popularity') return (b.avgRating * Math.log10(b.ratingCount + 1)) - (a.avgRating * Math.log10(a.ratingCount + 1));
+      if (sortBy === 'distance' && a.distanceKm !== undefined && b.distanceKm !== undefined) {
+        return a.distanceKm - b.distanceKm;
+      }
+      return (b.intelligentScore || 0) - (a.intelligentScore || 0);
     });
-  }, [venues, searchQuery, selectedCategoryId, selectedCity, maxPrice, minCapacity, sortBy]);
+  }, [backendFilteredVenues, isUsingBackendResults, venues, searchQuery, selectedCategoryId, selectedCity, maxPrice, minCapacity, sortBy]);
 
   const uniqueCities = ['All', ...Array.from(new Set(venues.map((v) => v.city)))];
 
@@ -96,7 +157,7 @@ export const SearchScreen: React.FC = () => {
     setSelectedCity('All');
     setMaxPrice(350000);
     setMinCapacity(0);
-    setSortBy('relevance');
+    setSortBy('intelligent');
   };
 
   return (
@@ -143,9 +204,45 @@ export const SearchScreen: React.FC = () => {
           </button>
         </div>
 
+        {/* Function Hall Filter Mode Active Banner */}
+        {isFunctionHallMode && (
+          <div className="flex items-center justify-between gap-3 bg-gradient-to-r from-rose-50 to-pink-50 border border-rose-200/80 rounded-xl px-3.5 py-2">
+            <div className="flex items-center gap-2">
+              <span className="text-base">🏛️</span>
+              <div>
+                <p className="text-xs font-bold text-rose-900">
+                  Function Halls Mode Active
+                </p>
+                <p className="text-[10px] text-rose-600">
+                  Displaying only Function Hall related categories (Marriage Halls, Banquets, Convention Centers, Mini Halls, Party Lawns)
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setSelectedCategoryId('all')}
+              className="text-xs font-bold px-2.5 py-1 rounded-lg bg-rose-600 text-white hover:bg-rose-700 transition-colors shrink-0 flex items-center gap-1"
+            >
+              <RotateCcw className="w-3 h-3" />
+              <span>Show All Categories</span>
+            </button>
+          </div>
+        )}
+
         {/* Category Horizontal Filter Strip (Colorful, Simple & Eye-Catching) */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1.5 no-scrollbar">
-          {SAMPLE_CATEGORIES.map((cat) => {
+          {/* Back to All Categories button if in Function Hall Mode */}
+          {isFunctionHallMode && (
+            <button
+              onClick={() => setSelectedCategoryId('all')}
+              className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 transition-all shadow-xs"
+              title="Return to all main categories"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>All Categories</span>
+            </button>
+          )}
+
+          {displayedCategories.map((cat) => {
             const isSelected = selectedCategoryId === cat.slug;
             const meta = getCategoryMeta(cat.slug);
             return (
@@ -248,26 +345,116 @@ export const SearchScreen: React.FC = () => {
         )}
       </div>
 
-      {/* Results Header with Sorting */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-        <div className="text-xs text-slate-500">
-          Showing <span className="font-bold text-slate-900">{filteredResults.length}</span> matching spaces
-          {searchQuery && <span> for "{searchQuery}"</span>}
+      {/* Results Header with Intelligent Sorting Controls */}
+      <div className="space-y-3">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            <div className="text-slate-500">
+              Showing <span className="font-bold text-slate-900">{filteredResults.length}</span> matching spaces
+              {searchQuery && <span> for "{searchQuery}"</span>}
+            </div>
+            {selectedCategoryId !== 'all' && (
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-medium shadow-2xs">
+                <Database className="w-3 h-3 text-emerald-600" />
+                <span>
+                  Backend Query: <code className="font-semibold text-emerald-800">category_id="{selectedCategoryId}"</code>
+                </span>
+              </div>
+            )}
+            {isVenuesLoading && (
+              <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-[11px] font-medium animate-pulse">
+                <RefreshCw className="w-3 h-3 animate-spin text-indigo-600" />
+                <span>Querying database & ranking...</span>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2 text-xs w-full sm:w-auto justify-between sm:justify-end">
+            <span className="text-slate-500 font-medium shrink-0">Sort:</span>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as VenueSortOption)}
+              className="px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 shadow-2xs focus:border-indigo-500 focus:outline-hidden"
+            >
+              <option value="intelligent">🧠 Intelligent Match (Distance + Popularity + Slots)</option>
+              <option value="distance">📍 Distance: Nearest First</option>
+              <option value="popularity">🔥 Popularity & Bookings</option>
+              <option value="availability">⚡ Availability: Open Slots First</option>
+              <option value="rating">⭐ Highest Rated</option>
+              <option value="price_low">₹ Price: Low to High</option>
+              <option value="price_high">₹ Price: High to Low</option>
+            </select>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2 text-xs">
-          <span className="text-slate-400 font-medium">Sort by:</span>
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as any)}
-            className="px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700 focus:border-indigo-500 focus:outline-hidden"
-          >
-            <option value="relevance">Relevance & Verified</option>
-            <option value="rating">Highest Rated</option>
-            <option value="price_low">Price: Low to High</option>
-            <option value="price_high">Price: High to Low</option>
-          </select>
+        {/* Quick Sorting Filter Pills */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar text-xs">
+          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider shrink-0">Quick Sort:</span>
+          {[
+            { id: 'intelligent', label: 'Intelligent Match', icon: Sparkles, color: 'text-amber-600' },
+            { id: 'distance', label: 'Nearest First', icon: MapPin, color: 'text-rose-600' },
+            { id: 'popularity', label: 'Most Popular', icon: TrendingUp, color: 'text-blue-600' },
+            { id: 'availability', label: 'Open Slots', icon: Zap, color: 'text-emerald-600' },
+            { id: 'rating', label: 'Top Rated', icon: Star, color: 'text-amber-500' },
+          ].map((item) => {
+            const isSelected = sortBy === item.id;
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setSortBy(item.id as VenueSortOption)}
+                className={`shrink-0 flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition-all duration-150 ${
+                  isSelected
+                    ? 'bg-slate-900 text-white border-slate-900 shadow-xs scale-102'
+                    : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:border-slate-300'
+                }`}
+              >
+                <Icon className={`w-3.5 h-3.5 ${isSelected ? 'text-amber-300' : item.color}`} />
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
         </div>
+
+        {/* Multi-factor Intelligent Scoring Explanation Banner */}
+        {sortBy === 'intelligent' && (
+          <div className="p-3 bg-gradient-to-r from-amber-50/90 via-orange-50/60 to-indigo-50/70 border border-amber-200/70 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-amber-950 shadow-2xs">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-lg bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-2xs">
+                <Sparkles className="w-3.5 h-3.5" />
+              </div>
+              <div>
+                <span className="font-extrabold text-amber-900">Multi-Factor Intelligent Sorting Active</span>
+                <span className="text-amber-700 block sm:inline sm:ml-2">
+                  Weighted by <strong>35% Proximity</strong>, <strong>40% Popularity & Ratings</strong>, and <strong>25% Slot Availability</strong>.
+                </span>
+              </div>
+            </div>
+            {userCoordinates && (
+              <div className="shrink-0 flex items-center gap-1 text-[11px] font-semibold text-slate-600 bg-white/80 px-2.5 py-1 rounded-xl border border-amber-200/50">
+                <Navigation className="w-3 h-3 text-indigo-600" />
+                <span>Reference: {selectedCity !== 'All' ? selectedCity : 'Hyderabad Center'}</span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Proximity Distance Banner */}
+        {sortBy === 'distance' && (
+          <div className="p-3 bg-indigo-50/80 border border-indigo-200/70 rounded-2xl flex items-center justify-between gap-2 text-xs text-indigo-950 shadow-2xs">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-lg bg-indigo-600 text-white flex items-center justify-center shrink-0">
+                <MapPin className="w-3.5 h-3.5" />
+              </div>
+              <div>
+                <span className="font-extrabold text-indigo-950">Nearest First Sorting</span>
+                <span className="text-indigo-700 ml-2">
+                  Calculating real-time geodesic distance from your reference location.
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Results Grid */}

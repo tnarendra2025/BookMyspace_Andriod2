@@ -349,3 +349,10 @@ REQUESTED / HELD ──→ PAYMENT_PENDING ──→ CONFIRMED ──→ CHECKED
 Visit Track:        VISIT_REQUESTED ──→ VISIT_COMPLETED
 Reservation Track:  RESERVATION_PENDING ──→ PAYMENT_PENDING ──→ CONFIRMED ──→ ACTIVE ──→ COMPLETED / MOVED_OUT
 ```
+
+---
+
+## 46. External Sites / MCP / API Integration Architecture (Sections 65–99)
+- Integrations with external websites, third-party APIs, MCP servers, SaaS platforms, and partner booking systems must strictly route through a **centralized backend integration layer** (`Supabase Edge Function / Secure Server API`), never directly from Flutter screens.
+- Full specifications, data normalization, secret management, circuit breaking, admin controls, and platform compatibility are governed by the master architecture mandates documented in `AGENTS.md` and `GEMINI.md` (Sections 65–99).
+

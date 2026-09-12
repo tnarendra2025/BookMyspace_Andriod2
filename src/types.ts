@@ -141,6 +141,7 @@ export interface Venue {
   avgRating: number;
   ratingCount: number;
   category: VenueCategory;
+  categoryId?: string;
   images: VenueImage[];
   videos?: VenueVideo[];
   facilities: VenueFacility[];
@@ -155,7 +156,25 @@ export interface Venue {
   locationHierarchy?: LocationHierarchy;
   featuredImageUrl?: string;
   ownerId?: string;
+  intelligentScore?: number;
+  scoreBreakdown?: {
+    distanceKm: number;
+    distanceScore: number;
+    popularityScore: number;
+    availabilityScore: number;
+    compositeScore: number;
+  };
 }
+
+export type VenueSortOption =
+  | 'intelligent'
+  | 'distance'
+  | 'popularity'
+  | 'availability'
+  | 'price_low'
+  | 'price_high'
+  | 'rating'
+  | 'relevance';
 
 export type BookingStatus =
   | 'CONFIRMED'
@@ -292,7 +311,7 @@ export interface AppNotification {
   id: string;
   title: string;
   message: string;
-  type: 'booking' | 'payment' | 'admin' | 'promo';
+  type: 'booking' | 'payment' | 'admin' | 'promo' | 'system';
   timestamp: number;
   read: boolean;
   linkRoute?: string;
@@ -416,6 +435,49 @@ export interface PaymentTransactionRecord {
   utrOrRrn: string;
 }
 
+export interface ModularFeature {
+  id: string;
+  title: string;
+  category: 'CORE' | 'AI' | 'PAYMENT' | 'CONCURRENCY' | 'NOTIFICATIONS' | 'EXPERIMENTAL';
+  description: string;
+  isEnabled: boolean;
+  isExperimental?: boolean;
+  rolloutPercentage?: number;
+  healthStatus: 'HEALTHY' | 'AUTO_RECOVERED' | 'MONITORING';
+  latencyMs: number;
+  configParams: Record<string, string | number | boolean>;
+  updatedAt?: number;
+  updatedBy?: string;
+  notes?: string;
+}
+
+export interface SelfHealingLog {
+  id: string;
+  timestamp: number;
+  timeFormatted: string;
+  category: 'INVENTORY' | 'PAYMENT' | 'DATABASE' | 'NETWORK' | 'AI_GATEWAY';
+  title: string;
+  message: string;
+  status: 'HEALED' | 'AUTO_RECOVERED' | 'RESOLVED' | 'INFO';
+  details?: string;
+  recoveredEntityId?: string;
+}
+
+export interface SystemDiagnosticReport {
+  overallHealthScore: number;
+  lastScanTimestamp: number;
+  status: 'ALL_SYSTEMS_OPTIMAL' | 'HEALED_ANOMALIES' | 'SCANNING';
+  checks: {
+    name: string;
+    category: string;
+    status: 'PASS' | 'HEALED' | 'ATTENTION';
+    latencyMs: number;
+    details: string;
+  }[];
+  activeAnomaliesCount: number;
+  resolvedAnomaliesCount: number;
+}
+
 export type ActiveScreen =
   | 'home'
   | 'search'
@@ -434,6 +496,8 @@ export type ActiveScreen =
   | 'admin-settings'
   | 'admin-element-editor'
   | 'admin-plug-play'
+  | 'plug-play'
+  | 'self-healing'
   | 'listing-fields-config'
   | 'registration-builder'
   | 'tax-invoice-customizer'

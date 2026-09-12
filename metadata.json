@@ -1,6 +1,6 @@
 {
   "name": "BookMySpace",
-  "description": "Smart venue, court, hotel, PG hostel, and academy booking platform.",
+  "description": "Smart venue, court, hotel, and academy booking platform with autonomous self-healing and plug-and-play features hub.",
   "requestFramePermissions": [
     "geolocation"
   ],
