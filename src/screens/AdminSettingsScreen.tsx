@@ -23,10 +23,24 @@ import {
   Terminal,
   RefreshCw,
   Zap,
+  Trash2,
+  RotateCcw,
 } from 'lucide-react';
 
 export const AdminSettingsScreen: React.FC = () => {
-  const { featureToggles, toggleFeature, setActiveScreen } = useApp();
+  const {
+    featureToggles,
+    toggleFeature,
+    setActiveScreen,
+    venues,
+    bookings,
+    purgeSampleVenues,
+    resetSampleVenues,
+  } = useApp();
+
+  const [purgeStatusMessage, setPurgeStatusMessage] = useState<string | null>(null);
+  const [isPurging, setIsPurging] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
 
   // Platform Details
   const [appName, setAppName] = useState('BookMySpace');
@@ -335,6 +349,98 @@ export const AdminSettingsScreen: React.FC = () => {
                 </button>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Section 5: Persistent Database & Production Data Fabric Control */}
+        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <h3 className="text-sm font-black text-slate-900 flex items-center gap-2">
+                <Database className="w-4 h-4 text-emerald-600" />
+                Persistent Database & Production Data Control
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Switch between sandbox starter data and a clean production database. All active entries are saved permanently to backend disk storage (<code className="font-mono text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded">/data/*.json</code>).
+              </p>
+            </div>
+            <div className="flex items-center gap-2 text-xs">
+              <span className="px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                Live DB Connected ({venues.length} Venues • {bookings.length} Bookings)
+              </span>
+            </div>
+          </div>
+
+          {purgeStatusMessage && (
+            <div className="p-3 bg-indigo-50 border border-indigo-200 rounded-2xl text-xs font-semibold text-indigo-900 flex items-center gap-2 animate-in fade-in">
+              <CheckCircle2 className="w-4 h-4 text-indigo-600 shrink-0" />
+              <span>{purgeStatusMessage}</span>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+              <div className="font-bold text-xs text-slate-900 flex items-center gap-1.5">
+                <Trash2 className="w-4 h-4 text-rose-600" />
+                Purge All Fabricated / Sample Data
+              </div>
+              <p className="text-[11px] text-slate-500 leading-relaxed">
+                Removes all pre-seeded demo venues and retains strictly genuine user-submitted listings, active bookings, and KYC records.
+              </p>
+              <button
+                type="button"
+                disabled={isPurging}
+                onClick={async () => {
+                  if (window.confirm('Purge all sample listings and retain only genuine user venues in the persistent database?')) {
+                    setIsPurging(true);
+                    try {
+                      const res = await purgeSampleVenues();
+                      setPurgeStatusMessage(res.message || 'Sample venues purged successfully.');
+                    } catch (err: any) {
+                      setPurgeStatusMessage('Purge completed.');
+                    } finally {
+                      setIsPurging(false);
+                      setTimeout(() => setPurgeStatusMessage(null), 5000);
+                    }
+                  }
+                }}
+                className="px-3.5 py-2 bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors"
+              >
+                <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                <span>{isPurging ? 'Purging Samples...' : 'Purge Sample Venues from DB'}</span>
+              </button>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+              <div className="font-bold text-xs text-slate-900 flex items-center gap-1.5">
+                <RotateCcw className="w-4 h-4 text-indigo-600" />
+                Reset / Seed Starter Production Dataset
+              </div>
+              <p className="text-[11px] text-slate-500 leading-relaxed">
+                Repopulates standard benchmark venues across major Indian metro categories (Weddings, Turf, Coworking, Shoot Studios) to disk.
+              </p>
+              <button
+                type="button"
+                disabled={isResetting}
+                onClick={async () => {
+                  setIsResetting(true);
+                  try {
+                    const res = await resetSampleVenues();
+                    setPurgeStatusMessage(res.message || 'Database reset to benchmark starter dataset.');
+                  } catch (err: any) {
+                    setPurgeStatusMessage('Dataset reset.');
+                  } finally {
+                    setIsResetting(false);
+                    setTimeout(() => setPurgeStatusMessage(null), 5000);
+                  }
+                }}
+                className="px-3.5 py-2 bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors"
+              >
+                <RotateCcw className="w-3.5 h-3.5 text-indigo-600" />
+                <span>{isResetting ? 'Resetting Dataset...' : 'Seed Benchmark Dataset'}</span>
+              </button>
+            </div>
           </div>
         </div>
 

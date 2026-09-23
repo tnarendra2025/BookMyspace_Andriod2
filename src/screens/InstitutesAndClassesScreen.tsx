@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { InstituteClass, ConfirmedClassBooking } from '../types';
 import { SAMPLE_INSTITUTE_CLASSES } from '../data/mockData';
+import { fetchClassesFromDatabase, enrollStudentInClass } from '../services/classService';
 
 export const InstitutesAndClassesScreen: React.FC = () => {
   const { setActiveScreen, selectedLocation } = useApp();
@@ -49,6 +50,25 @@ export const InstitutesAndClassesScreen: React.FC = () => {
   const [isDemoTrial, setIsDemoTrial] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // Fetch real persistent classes from backend database on mount
+  React.useEffect(() => {
+    let isMounted = true;
+    const loadClasses = async () => {
+      try {
+        const backendClasses = await fetchClassesFromDatabase(selectedCategory);
+        if (isMounted && backendClasses && backendClasses.length > 0) {
+          setClassesList(backendClasses as InstituteClass[]);
+        }
+      } catch (err) {
+        console.warn('Failed to fetch classes from backend database:', err);
+      }
+    };
+    loadClasses();
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedCategory]);
+
   const categories = ['All', 'Sports & Fitness', 'Academics', 'Tech & Coding', 'Dance', 'Music & Arts'];
   const deliveryModes = ['All', 'OFFLINE', 'ONLINE', 'HYBRID'];
 
@@ -70,13 +90,22 @@ export const InstitutesAndClassesScreen: React.FC = () => {
     });
   }, [classesList, searchQuery, selectedCategory, selectedMode, showOngoingToday, showWaitlistOnly]);
 
-  const handleConfirmEnrollment = () => {
+  const handleConfirmEnrollment = async () => {
     if (!bookingClassTarget) return;
     setIsProcessing(true);
 
-    setTimeout(() => {
+    try {
+      const res = await enrollStudentInClass({
+        classId: bookingClassTarget.id,
+        studentName,
+        studentPhone,
+        isDemoTrial,
+      });
+
+      const enrollmentId = res.enrollmentRef || `BMS-CLS-${Math.floor(100000 + Math.random() * 900000)}`;
+
       const newBooking: ConfirmedClassBooking = {
-        id: `BMS-CLS-${Math.floor(100000 + Math.random() * 900000)}`,
+        id: enrollmentId,
         studentName,
         studentPhone,
         className: bookingClassTarget.title,
@@ -87,15 +116,20 @@ export const InstitutesAndClassesScreen: React.FC = () => {
         date: new Date().toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' }),
       };
 
-      // Decrement available seats
+      // Decrement available seats in local state
       setClassesList((prev) =>
-        prev.map((c) => (c.id === bookingClassTarget.id ? { ...c, availableSeats: Math.max(0, c.availableSeats - 1) } : c))
+        prev.map((c) =>
+          c.id === bookingClassTarget.id ? { ...c, availableSeats: Math.max(0, c.availableSeats - 1) } : c
+        )
       );
 
       setIsProcessing(false);
       setBookingClassTarget(null);
       setConfirmedBooking(newBooking);
-    }, 600);
+    } catch (err) {
+      console.error('Failed to submit real enrollment:', err);
+      setIsProcessing(false);
+    }
   };
 
   return (

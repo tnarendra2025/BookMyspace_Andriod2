@@ -30,7 +30,26 @@ import {
 } from '../data/mockData';
 import { DEFAULT_CUSTOMER_REGISTRATION_FIELDS } from '../data/defaultRegistrationFields';
 import { DEFAULT_PLUG_PLAY_FEATURES } from '../data/defaultFeatures';
-import { fetchVenuesFromBackend } from '../services/venueService';
+import {
+  fetchVenuesFromBackend,
+  createVenueOnBackend,
+  updateVenueOnBackend,
+  deleteVenueOnBackend,
+  purgeSampleVenuesOnBackend,
+} from '../services/venueService';
+import {
+  fetchBookingsFromDatabase,
+  createBookingInDatabase,
+  updateBookingStatusInDatabase,
+  checkInQrToken,
+} from '../services/bookingService';
+import {
+  fetchAuthenticatedProfile,
+  sendOtpToIdentifier,
+  verifyOtpAndAuthenticate,
+  registerNewUser,
+  logoutUserSession,
+} from '../services/authService';
 import {
   INITIAL_PLUG_PLAY_MODULES,
   INITIAL_SELF_HEALING_LOGS,
@@ -72,6 +91,9 @@ interface AppContextType {
   // Auth & Roles
   currentUser: AuthUser;
   switchRole: (role: UserRole) => void;
+  requestOtp: (identifier: string) => Promise<{ success: boolean; testOtp?: string; message: string }>;
+  loginWithOtp: (identifier: string, otp: string, role?: UserRole, fullName?: string) => Promise<boolean>;
+  logoutUser: () => Promise<void>;
 
   // Locations
   selectedLocation: LocationHierarchy;
@@ -82,6 +104,9 @@ interface AppContextType {
   venues: Venue[];
   addVenue: (venue: Partial<Venue>) => Venue;
   updateVenue: (id: string, updates: Partial<Venue>) => void;
+  deleteVenue: (id: string) => Promise<void>;
+  purgeSampleVenues: () => Promise<{ success: boolean; count: number; message: string }>;
+  resetSampleVenues: () => Promise<{ success: boolean; message: string }>;
   approveVenue: (id: string) => void;
   rejectVenue: (id: string, reason: string) => void;
   toggleFavoriteVenue: (id: string) => void;
@@ -393,6 +418,35 @@ const CITY_COORDINATES: Record<string, { lat: number; lng: number }> = {
   const [notifications, setNotifications] = useState<AppNotification[]>(SAMPLE_NOTIFICATIONS);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>(SAMPLE_AUDIT_LOGS);
   const [featureToggles, setFeatureToggles] = useState<AppFeatureToggle[]>(INITIAL_FEATURE_TOGGLES);
+
+  // Load real bookings and verified user session from persistent database on mount
+  useEffect(() => {
+    let isMounted = true;
+    const initializePersistentData = async () => {
+      try {
+        const [dbBookings, activeProfile] = await Promise.all([
+          fetchBookingsFromDatabase(),
+          fetchAuthenticatedProfile(),
+        ]);
+
+        if (isMounted) {
+          if (dbBookings && dbBookings.length > 0) {
+            setBookings(dbBookings);
+          }
+          if (activeProfile) {
+            setCurrentUser(activeProfile);
+          }
+        }
+      } catch (err) {
+        console.warn('Initialization from backend database deferred, using cache:', err);
+      }
+    };
+
+    initializePersistentData();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Active Concurrency Hold (10-minute hold expiration)
   const [activeHold, setActiveHold] = useState<{
@@ -1303,6 +1357,11 @@ const CITY_COORDINATES: Record<string, { lat: number; lng: number }> = {
 
     setVenues((prev) => [newVenue, ...prev]);
 
+    // Persist to real backend database
+    createVenueOnBackend(newVenue).catch((err) => {
+      console.warn('Backend sync for new venue deferred:', err);
+    });
+
     addAuditLog({
       actorName: currentUser.fullName,
       actorRole: currentUser.role,
@@ -1332,12 +1391,76 @@ const CITY_COORDINATES: Record<string, { lat: number; lng: number }> = {
     setVenues((prev) =>
       prev.map((v) => (v.id === id ? { ...v, ...updates } : v))
     );
+    // Persist updates to backend database
+    updateVenueOnBackend(id, updates).catch((err) => {
+      console.warn('Backend sync for venue update deferred:', err);
+    });
+  };
+
+  const deleteVenue = async (id: string) => {
+    setVenues((prev) => prev.filter((v) => v.id !== id));
+    await deleteVenueOnBackend(id);
+    refetchVenues().catch(() => {});
+  };
+
+  const purgeSampleVenues = async () => {
+    const res = await purgeSampleVenuesOnBackend();
+    if (res.success) {
+      setVenues((prev) => prev.filter((v) => (v as any).isSample !== true));
+      await refetchVenues();
+    }
+    return { success: res.success, count: res.remainingCount, message: res.message };
+  };
+
+  const resetSampleVenues = async () => {
+    try {
+      const res = await fetch('/api/venues/reset-samples', { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        await refetchVenues();
+      }
+      return { success: data.success, message: data.message };
+    } catch (err: any) {
+      return { success: false, message: err?.message || 'Failed to reset samples' };
+    }
+  };
+
+  // Real Authentication Actions
+  const requestOtp = async (identifier: string) => {
+    const res = await sendOtpToIdentifier(identifier);
+    return {
+      success: res.success,
+      testOtp: res.testOtp,
+      message: res.message || 'OTP processed',
+    };
+  };
+
+  const loginWithOtp = async (identifier: string, otp: string, role: UserRole = 'USER', fullName?: string) => {
+    const res = await verifyOtpAndAuthenticate(identifier, otp, role, fullName);
+    if (res.success && res.user) {
+      setCurrentUser(res.user);
+      return true;
+    }
+    return false;
+  };
+
+  const logoutUser = async () => {
+    await logoutUserSession();
+    setCurrentUser({
+      id: 'user_user',
+      fullName: 'Narendra Reddy',
+      email: 'tnarendra2025@gmail.com',
+      phone: '+91 98765 43210',
+      role: 'USER',
+      avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80',
+    });
   };
 
   const approveVenue = (id: string) => {
     setVenues((prev) =>
       prev.map((v) => (v.id === id ? { ...v, status: 'APPROVED', isVerified: true } : v))
     );
+    updateVenueOnBackend(id, { status: 'APPROVED', isVerified: true }).catch(() => {});
     const target = venues.find((v) => v.id === id);
     addAuditLog({
       actorName: currentUser.fullName,
@@ -1354,6 +1477,7 @@ const CITY_COORDINATES: Record<string, { lat: number; lng: number }> = {
     setVenues((prev) =>
       prev.map((v) => (v.id === id ? { ...v, status: 'REJECTED', rejectionReason: reason } : v))
     );
+    updateVenueOnBackend(id, { status: 'REJECTED', rejectionReason: reason }).catch(() => {});
     addAuditLog({
       actorName: currentUser.fullName,
       actorRole: 'ADMIN',
@@ -1415,6 +1539,11 @@ const CITY_COORDINATES: Record<string, { lat: number; lng: number }> = {
 
     setBookings((prev) => [createdBooking, ...prev]);
 
+    // Persist to real backend bookings database
+    createBookingInDatabase(createdBooking).catch((err) => {
+      console.warn('Backend persistence for booking deferred:', err);
+    });
+
     // Record audit trail
     addAuditLog({
       actorName: currentUser.fullName,
@@ -1464,6 +1593,8 @@ const CITY_COORDINATES: Record<string, { lat: number; lng: number }> = {
         return b;
       })
     );
+
+    updateBookingStatusInDatabase(bookingId, 'CANCELLED', 'REFUNDED').catch(() => {});
 
     const targetBooking = bookings.find((b) => b.id === bookingId);
     const refundVal = targetBooking ? Math.round(targetBooking.totalAmount * 0.9) : 0;
@@ -1566,6 +1697,9 @@ const CITY_COORDINATES: Record<string, { lat: number; lng: number }> = {
         setSelectedCategoryId,
         currentUser,
         switchRole,
+        requestOtp,
+        loginWithOtp,
+        logoutUser,
         selectedLocation,
         setSelectedLocation,
         allLocations: POPULAR_LOCATIONS,
@@ -1579,6 +1713,9 @@ const CITY_COORDINATES: Record<string, { lat: number; lng: number }> = {
         refetchVenues,
         addVenue,
         updateVenue,
+        deleteVenue,
+        purgeSampleVenues,
+        resetSampleVenues,
         approveVenue,
         rejectVenue,
         toggleFavoriteVenue,

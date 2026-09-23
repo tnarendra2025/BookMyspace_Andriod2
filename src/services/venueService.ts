@@ -91,3 +91,62 @@ export async function fetchVenuesFromBackend(
   }
   return await response.json();
 }
+
+export async function createVenueOnBackend(venueData: Partial<Venue>): Promise<{ success: boolean; venue?: Venue; error?: string }> {
+  try {
+    const res = await fetch('/api/venues', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(venueData),
+    });
+    return await res.json();
+  } catch (err: any) {
+    return { success: false, error: err?.message || 'Failed to save venue to database' };
+  }
+}
+
+export async function updateVenueOnBackend(id: string, updates: Partial<Venue>): Promise<{ success: boolean; venue?: Venue; error?: string }> {
+  try {
+    const res = await fetch(`/api/venues/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates),
+    });
+    return await res.json();
+  } catch (err: any) {
+    return { success: false, error: err?.message || 'Failed to update venue on database' };
+  }
+}
+
+export async function deleteVenueOnBackend(id: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const res = await fetch(`/api/venues/${id}`, {
+      method: 'DELETE',
+    });
+    return await res.json();
+  } catch (err: any) {
+    return { success: false, error: err?.message || 'Failed to delete venue from database' };
+  }
+}
+
+export async function purgeSampleVenuesOnBackend(): Promise<{ success: boolean; remainingCount: number; message: string }> {
+  try {
+    const res = await fetch('/api/venues/purge-samples', {
+      method: 'POST',
+    });
+    return await res.json();
+  } catch (err: any) {
+    return { success: false, remainingCount: 0, message: err?.message || 'Failed to purge samples' };
+  }
+}
+
+export async function resetSampleVenuesOnBackend(): Promise<{ success: boolean; count: number; message: string }> {
+  try {
+    const res = await fetch('/api/venues/reset-samples', {
+      method: 'POST',
+    });
+    return await res.json();
+  } catch (err: any) {
+    return { success: false, count: 0, message: err?.message || 'Failed to reset sample venues' };
+  }
+}
