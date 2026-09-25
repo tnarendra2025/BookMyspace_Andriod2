@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/location/presentation/widgets/hierarchical_location_picker_dialog.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -13,11 +12,13 @@ import '../../../../core/widgets/error_view.dart';
 import '../../../../core/widgets/glassmorphic_card.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 import '../../../../core/widgets/skeleton.dart';
+import '../../../auth/domain/auth_user.dart';
 import '../../../auth/presentation/auth_providers.dart';
 import '../../../venues/domain/venue.dart';
 import '../../../venues/presentation/venue_providers.dart';
 import '../../../venues/presentation/widgets/venue_badges.dart';
-import '../../search/presentation/widgets/voice_search_bottom_sheet.dart';
+import '../../../venues/presentation/widgets/venue_card.dart';
+import '../../../search/presentation/widgets/voice_search_bottom_sheet.dart';
 
 /// Sub-section item representation with counter and highlight flag for 3D Cards
 class SubSectionItem {
@@ -453,13 +454,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 final slug = name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_');
                 final emoji = emojiCtrl.text.trim().isNotEmpty ? emojiCtrl.text.trim() : '✨';
                 ref.read(venueRepositoryProvider).addCategory(
-                  VenueCategory(
-                    id: slug,
-                    name: name,
-                    slug: slug,
-                    icon: emoji,
-                    parentSection: section.id,
-                  ),
+                  name: name,
+                  slug: slug,
+                  icon: emoji,
+                  parentSection: section.id,
                 );
                 ref.invalidate(venueCategoriesProvider);
                 Navigator.of(ctx).pop();
@@ -481,9 +479,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context);
-    final authState = ref.watch(authNotifierProvider);
-    final user = authState.user;
+    final user = ref.watch(currentUserProvider);
     final popularVenuesAsync = ref.watch(popularVenuesProvider);
 
     return Scaffold(
@@ -506,8 +502,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       user: user,
                       responsive: responsive,
                       onLoginTap: () => context.push(AppRoutes.login),
-                      onProfileTap: () => context.push(AppRoutes.profile),
-                      onNotificationsTap: () => context.push(AppRoutes.notifications),
+                      // Profile and Notifications are shell tabs, so they must
+                      // be reached with `go`; `push` to a sibling branch is
+                      // silently dropped and leaves the user on Home.
+                      onProfileTap: () => context.go(AppRoutes.profile),
+                      onNotificationsTap: () =>
+                          context.go(AppRoutes.notifications),
                     ),
                   ),
 
@@ -515,6 +515,87 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   // 🌟 FIRST SCREEN: 3D CATEGORY SECTIONS (iOS, Android & Web)
                   // =========================================================
                   if (_selectedSection == null) ...[
+                    // Popular Spaces: featured venues on the landing view
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: responsive.horizontalPadding,
+                          vertical: 8,
+                        ),
+                        child: Text(
+                          'Popular Spaces',
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    popularVenuesAsync.when(
+                      data: (venues) {
+                        if (venues.isEmpty) {
+                          return const SliverToBoxAdapter(
+                            child: Padding(
+                              padding: EdgeInsets.all(32),
+                              child: EmptyState(
+                                icon: Icons.search_off_rounded,
+                                title: 'No spaces found',
+                                message: 'Try changing category or location filters.',
+                              ),
+                            ),
+                          );
+                        }
+                        // Horizontally scrollable featured carousel so the landing
+                        // view always surfaces popular spaces above the fold.
+                        return SliverToBoxAdapter(
+                          child: SizedBox(
+                            height: 290,
+                            child: ListView.separated(
+                              scrollDirection: Axis.horizontal,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: responsive.horizontalPadding,
+                              ),
+                              itemCount: venues.length,
+                              separatorBuilder: (_, __) =>
+                                  SizedBox(width: responsive.gridSpacing),
+                              itemBuilder: (context, index) {
+                                final isCompact = responsive.isCompact;
+                                return SizedBox(
+                                  width: isCompact ? 240 : 290,
+                                  child: VenueCard(venue: venues[index]),
+                                );
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                      loading: () => SliverToBoxAdapter(
+                        child: SizedBox(
+                          height: 290,
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: responsive.horizontalPadding,
+                            ),
+                            child: const Row(
+                              children: [
+                                Expanded(child: SkeletonBox(height: 280, radius: 16)),
+                                SizedBox(width: 12),
+                                Expanded(child: SkeletonBox(height: 280, radius: 16)),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      error: (err, _) => SliverToBoxAdapter(
+                        child: Padding(
+                          padding: EdgeInsets.all(responsive.horizontalPadding),
+                          child: ErrorView(
+                            message: err.toString(),
+                            onRetry: () => ref.invalidate(popularVenuesProvider),
+                          ),
+                        ),
+                      ),
+                    ),
+
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: EdgeInsets.symmetric(
@@ -545,51 +626,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                     ),
 
-                    // 3D Responsive Grid for Main Category Sections
-                    SliverPadding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: responsive.horizontalPadding,
-                      ),
-                      sliver: SliverGrid(
-                        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                          maxCrossAxisExtent: 440,
-                          mainAxisSpacing: 22,
-                          crossAxisSpacing: 22,
-                          mainAxisExtent: 475,
-                        ),
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            final section = MainHomeSection.values[index];
-                            final dynamicCats = (ref.watch(venueCategoriesProvider).value ?? const []);
-                            final cityName = _currentLocation.split('(').first.trim();
-                            return _ThreeDimensionalCategoryHeroCard(
-                              section: section,
-                              cityName: cityName.isNotEmpty ? cityName : 'Hyderabad',
-                              dynamicCats: dynamicCats,
-                              onTapExplore: () {
-                                setState(() {
-                                  _selectedSection = section;
-                                  _selectedCategorySlug = 'all';
-                                });
-                              },
-                              onSubSectionTap: (slug) {
-                                setState(() {
-                                  _selectedSection = section;
-                                  _selectedCategorySlug = slug;
-                                });
-                                context.push('${AppRoutes.search}?category=$slug');
-                              },
-                              onAddSubSectionTap: () {
-                                _showAddSubSectionDialog(context, section);
-                              },
-                            );
-                          },
-                          childCount: MainHomeSection.values.length,
-                        ),
-                      ),
-                    ),
-
-                    // Dynamic Categories Horizontal Strip
+                    // Trending Categories Horizontal Strip
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: EdgeInsets.symmetric(
@@ -610,12 +647,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               height: 40,
                               child: ListView.separated(
                                 scrollDirection: Axis.horizontal,
-                                itemCount: (ref.watch(venueCategoriesProvider).value ?? const [])
+                                itemCount: (ref.watch(venueCategoriesProvider).valueOrNull ?? const [])
                                     .where((c) => c.isActive && c.slug != 'all')
                                     .length,
                                 separatorBuilder: (_, __) => const SizedBox(width: 8),
                                 itemBuilder: (context, index) {
-                                  final cats = (ref.watch(venueCategoriesProvider).value ?? const [])
+                                  final cats = (ref.watch(venueCategoriesProvider).valueOrNull ?? const [])
                                       .where((c) => c.isActive && c.slug != 'all')
                                       .toList();
                                   final cat = cats[index];
@@ -624,13 +661,57 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     label: cat.name,
                                     emoji: cat.icon?.isNotEmpty == true ? cat.icon! : '🏷️',
                                     onTap: () {
-                                      context.push('${AppRoutes.search}?category=${cat.slug}');
+                                      context.go('${AppRoutes.search}?category=${cat.slug}');
                                     },
                                   );
                                 },
                               ),
                             ),
                           ],
+                        ),
+                      ),
+                    ),
+
+                    // 3D Responsive Grid for Main Category Sections
+                    SliverPadding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: responsive.horizontalPadding,
+                      ),
+                      sliver: SliverGrid(
+                        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent: 440,
+                          mainAxisSpacing: 22,
+                          crossAxisSpacing: 22,
+                          mainAxisExtent: 620,
+                        ),
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            final section = MainHomeSection.values[index];
+                            final dynamicCats = (ref.watch(venueCategoriesProvider).valueOrNull ?? const []);
+                            final cityName = _currentLocation.split('(').first.trim();
+                            return _ThreeDimensionalCategoryHeroCard(
+                              section: section,
+                              cityName: cityName.isNotEmpty ? cityName : 'Hyderabad',
+                              dynamicCats: dynamicCats,
+                              onTapExplore: () {
+                                setState(() {
+                                  _selectedSection = section;
+                                  _selectedCategorySlug = 'all';
+                                });
+                              },
+                              onSubSectionTap: (slug) {
+                                setState(() {
+                                  _selectedSection = section;
+                                  _selectedCategorySlug = slug;
+                                });
+                                context.go('${AppRoutes.search}?category=$slug');
+                              },
+                              onAddSubSectionTap: () {
+                                _showAddSubSectionDialog(context, section);
+                              },
+                            );
+                          },
+                          childCount: MainHomeSection.values.length,
                         ),
                       ),
                     ),
@@ -764,7 +845,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           const SizedBox(height: 6),
                           Builder(
                             builder: (context) {
-                              final dynamicCats = ref.watch(venueCategoriesProvider).value ?? const [];
+                              final dynamicCats = ref.watch(venueCategoriesProvider).valueOrNull ?? const [];
                               final options = _resolveSectionCategories(_selectedSection!, dynamicCats);
                               return SizedBox(
                                 height: 44,
@@ -809,13 +890,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             // Search Bar
                             InkWell(
                               onTap: () {
-                                context.push(
-                                  AppRoutes.search,
-                                  extra: {
-                                    'category': _selectedCategorySlug == 'all'
-                                        ? _selectedSection!.id
-                                        : _selectedCategorySlug,
-                                  },
+                                final cat = _selectedCategorySlug == 'all'
+                                    ? _selectedSection!.id
+                                    : _selectedCategorySlug;
+                                // Shell branch switch: `go` keeps the branch
+                                // navigator alive; `push` to a sibling branch
+                                // target is dropped and the URI snaps back.
+                                context.go(
+                                  '${AppRoutes.search}?category=$cat',
                                 );
                               },
                               borderRadius: BorderRadius.circular(16),
@@ -1158,7 +1240,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       onFilterApplied: (voiceResult) {
         final newQuery = voiceResult.toVenueSearchQuery();
         ref.read(searchQueryProvider.notifier).state = newQuery;
-        context.push(AppRoutes.search);
+        // Shell branch target: use `go` so navigation is not dropped.
+        context.go(AppRoutes.search);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Row(
@@ -1179,7 +1262,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         );
       },
       onFallbackToText: () {
-        context.push(AppRoutes.search);
+        // Shell branch target: use `go` so navigation is not dropped.
+        context.go(AppRoutes.search);
       },
     );
   }
@@ -1213,7 +1297,7 @@ class _TopHeaderBar extends StatelessWidget {
     required this.onNotificationsTap,
   });
 
-  final dynamic user;
+  final AuthUser? user;
   final ResponsiveInfo responsive;
   final VoidCallback onLoginTap;
   final VoidCallback onProfileTap;
@@ -1231,35 +1315,47 @@ class _TopHeaderBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [AppTheme.brand, Color(0xFF757DE8)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+          // Brand block is flexible so the actions row always fits: on
+          // compact phones the wordmark scales down instead of overflowing.
+          Flexible(
+            child: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [AppTheme.brand, Color(0xFF757DE8)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  borderRadius: BorderRadius.circular(10),
+                  child: const Icon(
+                    Icons.domain_rounded,
+                    color: Colors.white,
+                    size: 22,
+                  ),
                 ),
-                child: const Icon(
-                  Icons.domain_rounded,
-                  color: Colors.white,
-                  size: 22,
+                const SizedBox(width: 8),
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'BookMySpace',
+                      maxLines: 1,
+                      softWrap: false,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.5,
+                        color: AppTheme.brand,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'BookMySpace',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -0.5,
-                  color: AppTheme.brand,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
           Row(
             children: [
@@ -1281,7 +1377,9 @@ class _TopHeaderBar extends StatelessWidget {
                     radius: 18,
                     backgroundColor: theme.colorScheme.primaryContainer,
                     child: Text(
-                      user?.email?.isNotEmpty == true ? user.email[0].toUpperCase() : 'U',
+                      (user != null && user!.email.isNotEmpty)
+                          ? user!.email[0].toUpperCase()
+                          : 'U',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: theme.colorScheme.onPrimaryContainer,
@@ -1556,54 +1654,61 @@ class _ThreeDimensionalCategoryHeroCardState
                             ],
                           ),
 
-                          const Spacer(),
+                          const SizedBox(width: 12),
 
-                          // Top-right Badges
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFEEF2FF),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: const Color(0xFFC7D2FE).withValues(alpha: 0.6),
+                          // Top-right badges: flexible so long badge/city
+                          // labels ellipsize instead of overflowing the card.
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFEEF2FF),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: const Color(0xFFC7D2FE).withValues(alpha: 0.6),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    section.popularBadge,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 10.5,
+                                      fontWeight: FontWeight.w800,
+                                      color: Color(0xFF4338CA),
+                                      letterSpacing: 0.4,
+                                    ),
                                   ),
                                 ),
-                                child: Text(
-                                  section.popularBadge,
-                                  style: const TextStyle(
-                                    fontSize: 10.5,
-                                    fontWeight: FontWeight.w800,
-                                    color: Color(0xFF4338CA),
-                                    letterSpacing: 0.4,
+                                const SizedBox(height: 5),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF3F4F6),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    '${section.defaultCount} Spaces in ${widget.cityName}',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: Color(0xFF4B5563),
+                                    ),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(height: 5),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFF3F4F6),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  '${section.defaultCount} Spaces in ${widget.cityName}',
-                                  style: const TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xFF4B5563),
-                                  ),
-                                ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -1678,16 +1783,20 @@ class _ThreeDimensionalCategoryHeroCardState
                             color: Color(0xFF64748B),
                           ),
                           const SizedBox(width: 5),
-                          const Text(
-                            'SUB-SECTIONS INCLUDED:',
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF475569),
-                              letterSpacing: 0.5,
+                          const Expanded(
+                            child: Text(
+                              'SUB-SECTIONS INCLUDED:',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF475569),
+                                letterSpacing: 0.5,
+                              ),
                             ),
                           ),
-                          const Spacer(),
+                          const SizedBox(width: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 8,
@@ -1748,14 +1857,18 @@ class _ThreeDimensionalCategoryHeroCardState
                                       style: const TextStyle(fontSize: 12),
                                     ),
                                     const SizedBox(width: 5),
-                                    Text(
-                                      sub.label,
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                        color: sub.isHighlight
-                                            ? const Color(0xFF92400E)
-                                            : const Color(0xFF1E293B),
+                                    Flexible(
+                                      child: Text(
+                                        sub.label,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                          color: sub.isHighlight
+                                              ? const Color(0xFF92400E)
+                                              : const Color(0xFF1E293B),
+                                        ),
                                       ),
                                     ),
                                     const SizedBox(width: 5),
@@ -1803,9 +1916,9 @@ class _ThreeDimensionalCategoryHeroCardState
                                   color: const Color(0xFFCBD5E1),
                                 ),
                               ),
-                              child: Row(
+                              child: const Row(
                                 mainAxisSize: MainAxisSize.min,
-                                children: const [
+                                children: [
                                   Icon(
                                     Icons.add_rounded,
                                     size: 13,
@@ -1831,76 +1944,90 @@ class _ThreeDimensionalCategoryHeroCardState
 
                       // Bottom Row: Starts From Price + Explore Spaces Button
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'STARTS FROM',
-                                style: TextStyle(
-                                  fontSize: 9.5,
-                                  fontWeight: FontWeight.w800,
-                                  color: Color(0xFF94A3B8),
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                section.startsFromPrice,
-                                style: const TextStyle(
-                                  fontSize: 16.5,
-                                  fontWeight: FontWeight.w900,
-                                  color: Color(0xFF0F172A),
-                                  letterSpacing: -0.3,
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          const Spacer(),
-
-                          // Explore Spaces Pill Button
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 180),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 10,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF0F172A),
-                              borderRadius: BorderRadius.circular(22),
-                              boxShadow: [
-                                if (_isHovered)
-                                  BoxShadow(
-                                    color: const Color(0xFF0F172A).withValues(alpha: 0.35),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 4),
-                                  ),
-                              ],
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const Text(
-                                  'Explore Spaces',
+                                  'STARTS FROM',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.white,
-                                    letterSpacing: 0.2,
+                                    fontSize: 9.5,
+                                    fontWeight: FontWeight.w800,
+                                    color: Color(0xFF94A3B8),
+                                    letterSpacing: 0.5,
                                   ),
                                 ),
-                                const SizedBox(width: 6),
-                                Transform.translate(
-                                  offset: Offset(_isHovered ? 2.5 : 0.0, 0),
-                                  child: const Icon(
-                                    Icons.arrow_forward_rounded,
-                                    size: 14,
-                                    color: Colors.white,
+                                const SizedBox(height: 2),
+                                Text(
+                                  section.startsFromPrice,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 16.5,
+                                    fontWeight: FontWeight.w900,
+                                    color: Color(0xFF0F172A),
+                                    letterSpacing: -0.3,
                                   ),
                                 ),
                               ],
+                            ),
+                          ),
+
+                          const SizedBox(width: 8),
+
+                          // Explore Spaces Pill Button: flexible so it shrinks
+                          // (with an ellipsized label) on narrow cards.
+                          Flexible(
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 180),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 10,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF0F172A),
+                                borderRadius: BorderRadius.circular(22),
+                                boxShadow: [
+                                  if (_isHovered)
+                                    BoxShadow(
+                                      color: const Color(0xFF0F172A).withValues(alpha: 0.35),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                ],
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Flexible(
+                                    child: Text(
+                                      'Explore Spaces',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.white,
+                                        letterSpacing: 0.2,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Transform.translate(
+                                    offset: Offset(_isHovered ? 2.5 : 0.0, 0),
+                                    child: const Icon(
+                                      Icons.arrow_forward_rounded,
+                                      size: 14,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ],
@@ -2329,7 +2456,7 @@ class _SectionVenueCard extends StatelessWidget {
                       const SizedBox(width: 6),
                       IconButton.outlined(
                         onPressed: onCallTap,
-                        style: IconButton.outlinedFrom(
+                        style: IconButton.styleFrom(
                           minimumSize: const Size(38, 38),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -2340,7 +2467,7 @@ class _SectionVenueCard extends StatelessWidget {
                       const SizedBox(width: 6),
                       IconButton.filledTonal(
                         onPressed: onWhatsAppTap,
-                        style: IconButton.filledTonalFrom(
+                        style: IconButton.styleFrom(
                           minimumSize: const Size(38, 38),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),

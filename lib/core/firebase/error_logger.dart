@@ -1,4 +1,3 @@
-import 'package:firebase_performance/firebase_performance.dart';
 import 'package:flutter/foundation.dart';
 
 import 'crashlytics_service.dart';

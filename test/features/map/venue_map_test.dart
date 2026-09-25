@@ -1,7 +1,7 @@
 import 'package:bookmyspace/features/map/presentation/screens/venue_map_screen.dart';
 import 'package:bookmyspace/features/venues/domain/venue.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:latlong2/latlong.dart';
 
 void main() {
   group('VenueCluster', () {

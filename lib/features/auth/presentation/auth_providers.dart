@@ -1,10 +1,19 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' hide AuthUser, AuthState;
 
+import '../../../core/config/app_config.dart';
 import '../../notifications/presentation/notification_providers.dart';
 import '../domain/auth_repository.dart';
 import '../domain/auth_state.dart';
 import '../domain/auth_user.dart';
+
+/// Initializes the Supabase client using active application configuration.
+Future<void> initSupabase() async {
+  await Supabase.initialize(
+    url: AppConfig.supabaseUrl,
+    anonKey: AppConfig.supabaseAnonKey,
+  );
+}
 
 /// Supabase client provider.
 final supabaseProvider = Provider<SupabaseClient>((ref) {

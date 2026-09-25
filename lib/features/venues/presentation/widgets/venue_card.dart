@@ -45,7 +45,7 @@ class VenueCard extends ConsumerWidget {
                   right: 8,
                   child: favorite.when(
                     data: (isFav) => FavoriteButton(
-                      isFavorite: isFav ?? false,
+                      isFavorite: isFav,
                       onPressed: () =>
                           ref.read(toggleFavoriteProvider(venue.id).future),
                     ),
@@ -53,7 +53,7 @@ class VenueCard extends ConsumerWidget {
                       isFavorite: false,
                       onPressed: null,
                     ),
-                    error: (_, _) => const FavoriteButton(
+                    error: (_, __) => const FavoriteButton(
                       isFavorite: false,
                       onPressed: null,
                     ),

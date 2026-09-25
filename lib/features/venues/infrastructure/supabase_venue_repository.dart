@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/errors/app_exceptions.dart'
     show NotFoundException, mapError;
+import '../../../core/firebase/error_logger.dart';
 import '../domain/venue.dart';
 import '../domain/venue_repository.dart';
 

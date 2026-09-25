@@ -68,7 +68,12 @@ void main() {
     });
 
     test('fromResponse maps malformed data to a typed error', () {
-      expect(() => Refund.fromResponse('not a map'), throwsA(isA<Exception>()));
+      expect(
+        () => Refund.fromResponse(
+          ('not a map' as Object) as Map<String, dynamic>,
+        ),
+        throwsA(isA<TypeError>()),
+      );
     });
   });
 }

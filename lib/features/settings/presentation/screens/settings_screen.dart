@@ -39,7 +39,8 @@ class SettingsScreen extends ConsumerWidget {
             leading: const Icon(Icons.notifications_outlined),
             title: Text(l10n.notifications),
             trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => context.push(AppRoutes.notifications),
+            // /notifications is a shell tab: `go`, not `push`.
+            onTap: () => context.go(AppRoutes.notifications),
           ),
           ListTile(
             leading: const Icon(Icons.support_agent_rounded),

@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_theme.dart';
-import '../domain/speech_recognition_state.dart';
-import '../domain/voice_filter_parser.dart';
-import '../infrastructure/speech_recognition_service.dart';
+import '../../domain/speech_recognition_state.dart';
+import '../../domain/voice_filter_parser.dart';
+import '../../infrastructure/speech_recognition_service.dart';
 import '../voice_search_providers.dart';
 
 /// Interactive Voice Search Modal Bottom Sheet for iOS, Web, and mobile.
@@ -258,7 +258,7 @@ class _VoiceSearchBottomSheetState extends ConsumerState<VoiceSearchBottomSheet>
                             ? [theme.colorScheme.error, theme.colorScheme.error.withValues(alpha: 0.8)]
                             : isSuccess
                                 ? [Colors.green, Colors.teal]
-                                : [AppTheme.brand, AppTheme.brandDark],
+                                : [AppTheme.brand, AppTheme.brandLight],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),

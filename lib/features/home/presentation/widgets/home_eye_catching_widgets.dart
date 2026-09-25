@@ -365,7 +365,7 @@ class _HotDealsCarouselWidgetState extends State<HotDealsCarouselWidget> {
                             onPressed: () => widget.onClaimDeal(deal),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white,
-                              foregroundColor: Colors.black800,
+                              foregroundColor: Colors.black87,
                               elevation: 0,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),

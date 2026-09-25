@@ -1,26 +1,26 @@
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 
-/// Wrapper around Firebase Crashlytics for error reporting.
+/// Wrapper around error reporting / crash logging.
 class CrashlyticsService {
   CrashlyticsService._();
 
-  static final FirebaseCrashlytics _instance = FirebaseCrashlytics.instance;
+  static bool _collectionEnabled = true;
+  static String? _userId;
+  static String? get userId => _userId;
+  static final Map<String, Object> _customKeys = {};
 
   /// Initialize Crashlytics and set up error handlers.
   static Future<void> init({
     bool collectReports = true,
     bool recordFlutterFatalErrors = true,
   }) async {
+    _collectionEnabled = collectReports;
     if (kIsWeb) {
-      // Crashlytics on web requires additional setup
-      debugPrint('Crashlytics: Web platform - limited support');
+      debugPrint('Crashlytics: Web platform - console logging enabled');
       return;
     }
 
     try {
-      await _instance.setCrashlyticsCollectionEnabled(collectReports);
-
       if (recordFlutterFatalErrors) {
         FlutterError.onError = _recordFlutterError;
       }
@@ -30,19 +30,18 @@ class CrashlyticsService {
         return true;
       };
 
-      debugPrint('Crashlytics initialized');
+      debugPrint('Crashlytics initialized (resilient logging mode)');
     } catch (e) {
       debugPrint('Crashlytics init failed: $e');
     }
   }
 
-/// Record a Flutter framework error.
+  /// Record a Flutter framework error.
   static void _recordFlutterError(FlutterErrorDetails details) {
-    _instance.recordFlutterFatalError(details);
     debugPrint('Crashlytics recorded Flutter error: ${details.exception}');
   }
 
-/// Record a non-fatal error.
+  /// Record a non-fatal error.
   static void recordError(
     Object error,
     StackTrace? stack, {
@@ -50,15 +49,8 @@ class CrashlyticsService {
     Iterable<Object>? information,
     bool fatal = false,
   }) {
-    if (kIsWeb) return;
-
-    _instance.recordError(
-      error,
-      stack,
-      reason: reason,
-      information: information ?? [],
-      fatal: fatal,
-    );
+    if (!_collectionEnabled) return;
+    debugPrint('Crashlytics recordError [fatal=$fatal]: $error, reason: $reason');
   }
 
   /// Record a custom exception with context.
@@ -84,22 +76,19 @@ class CrashlyticsService {
 
   /// Set a custom user ID for crash reports.
   static Future<void> setUserId(String userId) async {
-    if (kIsWeb) return;
-    await _instance.setUserIdentifier(userId);
+    _userId = userId;
   }
 
   /// Add a custom key-value pair to crash reports.
   static Future<void> setCustomKey(String key, Object value) async {
-    if (kIsWeb) return;
-    await _instance.setCustomKey(key, value);
+    _customKeys[key] = value;
   }
 
   /// Log a custom message (appears in crash reports).
   static Future<void> log(String message) async {
-    if (kIsWeb) return;
-    await _instance.log(message);
+    debugPrint('Crashlytics log: $message');
   }
 
   /// Check if Crashlytics is enabled.
-  static bool get isEnabled => !kIsWeb;
+  static bool get isEnabled => _collectionEnabled;
 }

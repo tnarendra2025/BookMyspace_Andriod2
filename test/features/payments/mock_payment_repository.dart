@@ -97,6 +97,14 @@ class FakeCheckoutService implements CheckoutService {
   double? lastAmount;
   String? lastCurrency;
   String? lastKeyId;
+  @override
+  CheckoutResponse? get lastResponse => CheckoutResponse(
+    result: result,
+    orderId: lastOrderId,
+    paymentId: 'fake_pay_${lastOrderId ?? '123'}',
+    signature: 'fake_sig_123',
+    errorMessage: result == CheckoutResult.failed ? 'Payment failed.' : null,
+  );
 
   @override
   Future<CheckoutResult> openCheckout({

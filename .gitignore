@@ -25,6 +25,11 @@ build/
 *.keystore
 key.properties
 
+# Node / React admin frontend
+node_modules/
+dist/
+.vite/
+
 # macOS
 .DS_Store
 

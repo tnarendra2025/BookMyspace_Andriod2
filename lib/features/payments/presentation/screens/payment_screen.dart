@@ -3,9 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/router/app_router.dart';
-import '../../../../core/theme/app_theme.dart';
 import '../../../booking/domain/booking.dart';
 import '../../../booking/presentation/booking_providers.dart';
 import '../../../qr_checkin/presentation/widgets/qr_code_pass_widget.dart';
@@ -40,7 +38,6 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final booking = widget.booking;
     final paymentState = ref.watch(paymentNotifierProvider);
@@ -550,7 +547,7 @@ class _BottomPayBar extends StatelessWidget {
       label = 'Total Payable';
     }
 
-    return Surface(
+    return Material(
       color: theme.colorScheme.surface,
       elevation: 8,
       child: SafeArea(
@@ -872,6 +869,6 @@ class _PaymentSuccessView extends StatelessWidget {
   }
 }
 
-ShapeBorder RoundedCornerShape(double radius) =>
+OutlinedBorder RoundedCornerShape(double radius) =>
     RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius));
 

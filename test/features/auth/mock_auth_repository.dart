@@ -98,6 +98,19 @@ class MockAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<AuthUser> updateProfile({String? fullName, String? avatarUrl}) async {
+    if (_user != null) {
+      _user = _user!.copyWith(
+        fullName: fullName ?? _user!.fullName,
+        avatarUrl: avatarUrl ?? _user!.avatarUrl,
+      );
+      _controller.add(_user);
+      return _user!;
+    }
+    throw Exception('No user signed in');
+  }
+
+  @override
   Future<void> refreshSession() async {}
 
   void dispose() => _controller.close();

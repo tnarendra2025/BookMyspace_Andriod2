@@ -38,12 +38,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   void initState() {
     super.initState();
     _controller = TextEditingController();
-    if (widget.initialCategory != null) {
-      final current = ref.read(searchQueryProvider);
-      ref.read(searchQueryProvider.notifier).state = current.copyWith(
-        categorySlug: () => widget.initialCategory,
-      );
-    }
+    // NOTE: do NOT seed searchQueryProvider from initState (not even in a
+    // post-frame callback). Rebuilding Home->Search caused a provider write to
+    // land while go_router was still settling the push, aborting it back to
+    // /home in tests and blinking in prod. The query providers below read
+    // widget.initialCategory directly as the source of truth instead.
   }
 
   @override
@@ -112,7 +111,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       isScrollControlled: true,
       builder: (_) => _FilterSheet(
         initial: ref.read(searchQueryProvider),
-        categories: ref.read(venueCategoriesProvider).value ?? const [],
+        categories: ref.read(venueCategoriesProvider).valueOrNull ?? const [],
         onApply: (updated) {
           ref.read(searchQueryProvider.notifier).state = updated;
         },
@@ -123,8 +122,22 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final query = ref.watch(searchQueryProvider);
-    final results = ref.watch(searchResultsProvider);
+    // Home category taps pass the slug via `initialCategory`; treat it as the
+    // source of truth for the initial query so SearchScreen never writes to
+    // searchQueryProvider during build/navigation (which aborted the push in
+    // tests and blinked in prod). User edits afterwards flow through the
+    // global searchQueryProvider as before.
+    final globalQuery = ref.watch(searchQueryProvider);
+    final query = widget.initialCategory == null
+        ? globalQuery
+        : globalQuery.categorySlug == widget.initialCategory
+            ? globalQuery
+            : globalQuery.copyWith(
+                categorySlug: () => widget.initialCategory,
+              );
+    final results = ref.watch(
+      searchResultsForProvider(query),
+    );
     final categories = ref.watch(venueCategoriesProvider);
     final userLoc = ref.watch(userLocationProvider);
 
@@ -279,7 +292,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 return ListView.separated(
                   padding: const EdgeInsets.all(16),
                   itemCount: venues.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 12),
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
                   itemBuilder: (context, i) => VenueCard(venue: venues[i]),
                 );
               },

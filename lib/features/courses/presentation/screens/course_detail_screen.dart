@@ -119,7 +119,7 @@ class _CourseBody extends ConsumerWidget {
                   ),
                   const SizedBox(height: 20),
                 ],
-                Text(l10n.enrollInCourse, style: theme.textTheme.titleMedium),
+                Text(l10n.enrollNow, style: theme.textTheme.titleMedium),
                 const SizedBox(height: 10),
                 if (course.batches.isEmpty)
                   Text(

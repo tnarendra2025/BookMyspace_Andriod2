@@ -1,5 +1,5 @@
 import 'dart:convert';
-import '../../../booking/domain/booking.dart';
+import '../../booking/domain/booking.dart';
 
 /// Outcome of attempting to validate a QR pass at venue check-in.
 class CheckInResult {

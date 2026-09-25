@@ -55,7 +55,8 @@ class OwnerDashboardScreen extends ConsumerWidget {
                   _QuickAction(
                     icon: Icons.notifications_rounded,
                     label: l10n.notifications,
-                    onTap: () => context.push(AppRoutes.notifications),
+                    // /notifications is a shell tab: `go`, not `push`.
+                    onTap: () => context.go(AppRoutes.notifications),
                   ),
                   _QuickAction(
                     icon: Icons.analytics_rounded,

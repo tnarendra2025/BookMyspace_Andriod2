@@ -106,17 +106,17 @@ class _VenueDetailsBody extends ConsumerWidget {
                 onPressed: () =>
                     ref.read(toggleFavoriteProvider(venue.id).future),
                 icon: Icon(
-                  isFav ?? false
+                  isFav
                       ? Icons.favorite_rounded
                       : Icons.favorite_outline_rounded,
-                  color: isFav ?? false ? AppTheme.accent : null,
+                  color: isFav ? AppTheme.accent : null,
                 ),
               ),
               loading: () => const IconButton(
                 onPressed: null,
                 icon: Icon(Icons.favorite_outline_rounded),
               ),
-              error: (_, _) => const IconButton(
+              error: (_, __) => const IconButton(
                 onPressed: null,
                 icon: Icon(Icons.favorite_outline_rounded),
               ),
@@ -210,29 +210,20 @@ class _VenueDetailsBody extends ConsumerWidget {
                   _HoursList(hours: venue.operatingHours),
                   const SizedBox(height: 20),
                 ],
-                if (venue.foodOptions.isNotEmpty ||
-                    venue.parkingCapacity > 0) ...[
-                  Text(l10n.details, style: theme.textTheme.titleMedium),
-                  const SizedBox(height: 10),
+                Text(l10n.details, style: theme.textTheme.titleMedium),
+                const SizedBox(height: 10),
+                if (venue.capacity > 0)
                   _DetailRow(
-                    icon: Icons.restaurant_rounded,
-                    label: l10n.foodOptions,
-                    value: venue.foodOptions.isEmpty ? '—' : venue.foodOptions,
+                    icon: Icons.people_outline_rounded,
+                    label: l10n.capacity,
+                    value: '${venue.capacity} persons',
                   ),
-                  _DetailRow(
-                    icon: Icons.local_parking_rounded,
-                    label: l10n.parking,
-                    value: venue.parkingCapacity > 0
-                        ? '${venue.parkingCapacity} vehicles'
-                        : '—',
-                  ),
-                  _DetailRow(
-                    icon: Icons.receipt_long_rounded,
-                    label: l10n.taxRate,
-                    value: '${venue.taxRate.toStringAsFixed(0)}%',
-                  ),
-                  const SizedBox(height: 20),
-                ],
+                _DetailRow(
+                  icon: Icons.receipt_long_rounded,
+                  label: l10n.taxRate,
+                  value: '${venue.taxRate.toStringAsFixed(0)}%',
+                ),
+                const SizedBox(height: 20),
                 Text(l10n.address, style: theme.textTheme.titleMedium),
                 const SizedBox(height: 10),
                 _VenueMap(

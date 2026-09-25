@@ -21,7 +21,7 @@ class AppLocalizations {
     Locale('hi'),
   ];
 
-  String get appName => 'BookMySpace';
+  String get appName => locale.languageCode == 'te' ? 'బుక్‌మైస్పేస్' : 'BookMySpace';
   String get tagline => 'Discover and book spaces with ease';
   String get navHome => 'Home';
   String get navSearch => 'Search';
@@ -43,7 +43,7 @@ class AppLocalizations {
   String get basePrice => 'Base Price';
   String get capacity => 'Capacity';
   String get pricing => 'Starting at';
-  String get bookNow => 'Book Now';
+  String get bookNow => 'Book now';
   String get search => 'Search';
   String get searchHint => 'Search venues, cities or categories...';
   String get filters => 'Filters';
@@ -59,13 +59,13 @@ class AppLocalizations {
   String get topRated => 'Top Rated';
   String get noResults => 'No results found';
   String get noResultsMessage => 'Try a different keyword, category or price range.';
-  String get tryAgain => 'Try Again';
+  String get tryAgain => 'Try again';
   String get loading => 'Loading...';
   String get cancel => 'Cancel';
   String get confirm => 'Confirm';
   String get delete => 'Delete';
   String get done => 'Done';
-  String get keep => 'Keep';
+  String get keep => 'Keep booking';
   String get next => 'Next';
   String get skip => 'Skip';
   String get getStarted => 'Get Started';
@@ -73,33 +73,45 @@ class AppLocalizations {
   String get selectDate => 'Select Date';
   String get selectTimeSlot => 'Select Time Slot';
   String get noSlotsForDate => 'No slots available for this date';
-  String get confirmBooking => 'Confirm Booking';
-  String get cancelBooking => 'Cancel Booking';
+  String get confirmBooking => 'Confirm booking';
+  String get cancelBooking => 'Cancel booking';
   String get cancelBookingConfirm => 'Are you sure you want to cancel this booking?';
   String get myBookings => 'My Bookings';
   String get noBookings => 'No bookings yet';
   String get noBookingsMessage => 'Your booked venues and passes will appear here.';
-  String get requestRefund => 'Request Refund';
-  String get requestRefundConfirm => 'Are you sure you want to request a refund?';
-  String get refundRequested => 'Refund request submitted successfully';
+  String get requestRefund => 'Request refund';
+  String get requestRefundConfirm =>
+      'Request a full refund for this booking? The amount is returned to your original payment method.';
+  String get refundRequested => 'Refund requested successfully';
   String get savedVenues => 'Saved Venues';
   String get upcomingEvents => 'Upcoming Events';
   String get noUpcomingEvents => 'No upcoming events';
   String get noUpcomingEventsMessage => 'Check back later for new workshops and events.';
   String get freeEvent => 'Free';
   String get seatsLeft => '{count} seats left';
-  String get soldOut => 'Sold Out';
+  String get soldOut => 'Sold out';
   String get registered => 'Registered';
-  String get registerNow => 'Register Now';
-  String get cancelRegistration => 'Cancel Registration';
+  String get registerNow => 'Register now';
+  String get cancelRegistration => 'Cancel registration';
   String get cancelRegistrationConfirm => 'Are you sure you want to cancel your event registration?';
   String get registrationCancelled => 'Registration cancelled successfully';
   String get noCourses => 'No courses available';
   String get noCoursesMessage => 'Explore new courses and batches coming soon.';
   String get courseFee => 'Course Fee';
+  String get enrollNow => 'Enroll now';
+  String get dropEnrollment => 'Drop Enrollment';
+  String get durationWeeks => '{weeks} weeks';
+  String get instructor => 'Instructor';
+  String get enrollInCourse => 'Enroll now';
+  String get dropEnrollmentConfirm => 'Are you sure you want to drop your enrollment?';
+  String get enrollmentDropped => 'Enrollment dropped successfully';
+  String get enrolled => 'Enrolled';
+  String get batchStartsOn => 'Starts on';
   String get modeOnline => 'Online';
   String get modeOffline => 'Offline';
   String get modeHybrid => 'Hybrid';
+  String get analytics => 'Analytics';
+  String get reviews => 'Reviews';
   String get settings => 'Settings';
   String get themeMode => 'Theme Mode';
   String get language => 'Language';
@@ -117,12 +129,25 @@ class AppLocalizations {
   String get auditLog => 'Audit Log';
   String get ownerDashboard => 'Owner Dashboard';
   String get myVenues => 'My Venues';
-  String get onboardingTitle1 => 'Find Your Perfect Space';
+  String get onboardingTitle1 => 'Discover venues';
   String get onboardingSubtitle1 => 'Discover convention halls, party venues, sports grounds, and classrooms near you.';
   String get onboardingTitle2 => 'Real-Time Availability';
   String get onboardingSubtitle2 => 'Check open slots, transparent pricing, and instant booking confirmations.';
   String get onboardingTitle3 => 'Seamless & Secure';
   String get onboardingSubtitle3 => 'Pay securely with instant tax invoices and easy booking management.';
+
+  // Auth / login screen
+  String get errorRequired => 'This field is required';
+  String get errorInvalidPhone => 'Please enter a valid phone number';
+  String get continueWithGoogle => 'Continue with Google';
+  String get continueWithApple => 'Continue with Apple';
+  String get phone => 'Phone';
+  String get resendOtp => 'Resend OTP';
+  String get sendOtp => 'Send code';
+  String get otpSent => 'We sent a verification code to your email';
+  String get otpPlaceholder => 'Enter OTP';
+  String get verifyOtp => 'Verify & log in';
+  String get back => 'Back';
 }
 
 class _AppLocalizationsDelegate

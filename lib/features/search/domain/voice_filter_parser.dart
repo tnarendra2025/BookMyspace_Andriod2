@@ -183,7 +183,7 @@ class VoiceCommandFilterParser {
 
     // 5. Sort By Detection
     if (_containsAny(lower, ['cheapest', 'low price', 'lowest price', 'affordable'])) {
-      sortBy = VenueSortBy.priceLowToHigh;
+      sortBy = VenueSortBy.priceAsc;
       badges.add(const VoiceFilterBadge(iconEmoji: '🏷️', title: 'Sort', value: 'Price: Low to High'));
     } else if (_containsAny(lower, ['best rated', 'top rated', 'highest rating', 'popular'])) {
       sortBy = VenueSortBy.rating;

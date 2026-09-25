@@ -170,18 +170,18 @@ class _AdminIntegrationsScreenState
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.emerald.withValues(alpha: 0.1),
+                      color: Colors.green.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.emerald.withValues(alpha: 0.3)),
+                      border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
                     ),
                     child: const Row(
                       children: [
-                        Icon(Icons.shield_rounded, color: Colors.emerald, size: 18),
+                        Icon(Icons.shield_rounded, color: Colors.green, size: 18),
                         SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             'Secret Status: Configured ✓ (Protected in backend environment)',
-                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.emerald),
+                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.green),
                           ),
                         ),
                       ],
@@ -274,7 +274,7 @@ class _AdminIntegrationsScreenState
                       borderRadius: BorderRadius.circular(16),
                       side: BorderSide(
                         color: item.status.isOperational
-                            ? Colors.emerald.withValues(alpha: 0.3)
+                            ? Colors.green.withValues(alpha: 0.3)
                             : Colors.grey.withValues(alpha: 0.2),
                       ),
                     ),
@@ -398,8 +398,8 @@ class _StatusBadge extends StatelessWidget {
 
     switch (status) {
       case IntegrationStatus.connected:
-        bg = Colors.emerald.withValues(alpha: 0.12);
-        fg = Colors.emerald.shade800;
+        bg = Colors.green.withValues(alpha: 0.12);
+        fg = Colors.green.shade800;
         break;
       case IntegrationStatus.rateLimited:
         bg = Colors.amber.withValues(alpha: 0.15);

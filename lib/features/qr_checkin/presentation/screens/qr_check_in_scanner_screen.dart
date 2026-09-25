@@ -7,8 +7,8 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../booking/domain/booking.dart';
 import '../../../booking/presentation/booking_providers.dart';
-import '../domain/qr_check_in.dart';
-import '../presentation/qr_checkin_providers.dart';
+import '../../domain/qr_check_in.dart';
+import '../qr_checkin_providers.dart';
 import '../widgets/qr_code_pass_widget.dart';
 
 /// Screen providing CameraX-style QR scanning and digital entry pass display.
@@ -756,6 +756,6 @@ class _ViewfinderReticlePainter extends CustomPainter {
   }
 }
 
-ShapeBorder RoundedCornerShape(double radius) =>
+OutlinedBorder RoundedCornerShape(double radius) =>
     RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius));
 

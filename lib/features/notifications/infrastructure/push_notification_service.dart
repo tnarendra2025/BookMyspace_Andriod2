@@ -1,10 +1,10 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/router/app_router.dart';
@@ -337,7 +337,7 @@ class PushNotificationService {
   Future<void> schedule1HourReminder(Booking booking) async {
     if (booking.id.isEmpty) return;
 
-    final dateLabel = booking.bookingDate.isNotEmpty ? booking.bookingDate : booking.date;
+    final dateLabel = DateFormat('yyyy-MM-dd').format(booking.bookDate);
     final startLabel = booking.startTime.isNotEmpty ? booking.startTime : '10:00 AM';
     final reminderEpochMs = calculate1HourReminderTimeMillis(dateLabel, startLabel);
     final nowMs = DateTime.now().millisecondsSinceEpoch;
@@ -348,8 +348,8 @@ class PushNotificationService {
         : '${booking.startTime} - ${booking.endTime}'.trim().isNotEmpty
             ? '${booking.startTime} - ${booking.endTime}'
             : 'Reserved Slot';
-    final qrToken = booking.qrCodeToken.isNotEmpty
-        ? booking.qrCodeToken
+    final qrToken = booking.bookingRef.isNotEmpty
+        ? booking.bookingRef
         : 'BMS-PASS-${booking.id.length > 6 ? booking.id.substring(booking.id.length - 6).toUpperCase() : booking.id.toUpperCase()}';
 
     final info = ScheduledReminderInfo(
@@ -483,25 +483,29 @@ class PushNotificationService {
     final target = booking ??
         Booking(
           id: 'bk_live_${(1000 + DateTime.now().millisecond % 9000)}',
-          userId: 'user_live',
+          bookingRef: 'BMS-PASS-LIVE-88',
           venueId: 'v1',
-          date: 'Today',
+          slotId: 's1',
+          bookDate: DateTime.now(),
           startTime: '11:00 AM',
           endTime: '12:00 PM',
-          slotLabel: '11:00 AM - 12:00 PM',
+          amount: 1000,
+          taxAmount: 200,
           totalAmount: 1200,
-          status: 'confirmed',
+          status: BookingStatus.confirmed,
+          slotLabel: '11:00 AM - 12:00 PM',
           venueName: 'Smash Arena International',
-          bookingDate: 'Today',
-          qrCodeToken: 'BMS-PASS-LIVE-88',
         );
+
+    final targetDateLabel = DateFormat('yyyy-MM-dd').format(target.bookDate);
+    final targetQrToken = target.bookingRef.isNotEmpty ? target.bookingRef : 'BMS-PASS-LIVE-88';
 
     await show1HourReminderNotification(
       bookingId: target.id,
       venueName: target.venueName.isNotEmpty ? target.venueName : 'Smash Arena International',
       slotTime: target.slotLabel.isNotEmpty ? target.slotLabel : '11:00 AM - 12:00 PM',
-      bookingDate: target.bookingDate.isNotEmpty ? target.bookingDate : 'Today',
-      qrCodeToken: target.qrCodeToken.isNotEmpty ? target.qrCodeToken : 'BMS-PASS-LIVE-88',
+      bookingDate: targetDateLabel,
+      qrCodeToken: targetQrToken,
       customTitle: '⏰ Booking Starts in 1 Hour: ${target.venueName.isNotEmpty ? target.venueName : 'Smash Arena'}',
       customBody: 'Reminder: Your slot (${target.slotLabel}) begins in 60 minutes. Your QR pass is ready for check-in.',
     );

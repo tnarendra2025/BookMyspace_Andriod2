@@ -1848,17 +1848,17 @@ class LocationHierarchyRepository {
             .get(Uri.parse('/api/location/pincode/$clean'))
             .timeout(const Duration(seconds: 3));
         if (res.statusCode == 200) {
-          final data = jsonDecode(res.body);
-          if (data['success'] == true) {
+          final dynamic decoded = jsonDecode(res.body);
+          if (decoded is Map<String, dynamic> && decoded['success'] == true) {
             final loc = AdministrativeLocation(
-              country: data['country'] ?? 'India',
-              state: data['state'] ?? 'India',
-              district: data['district'] ?? '',
-              mandal: data['mandal'] ?? '',
-              townOrVillage: data['townOrVillage'] ?? 'PIN $clean',
+              country: decoded['country']?.toString() ?? 'India',
+              state: decoded['state']?.toString() ?? 'India',
+              district: decoded['district']?.toString() ?? '',
+              mandal: decoded['mandal']?.toString() ?? '',
+              townOrVillage: decoded['townOrVillage']?.toString() ?? 'PIN $clean',
               pincode: clean,
-              latitude: (data['latitude'] as num?)?.toDouble() ?? 0.0,
-              longitude: (data['longitude'] as num?)?.toDouble() ?? 0.0,
+              latitude: (decoded['latitude'] as num?)?.toDouble() ?? 0.0,
+              longitude: (decoded['longitude'] as num?)?.toDouble() ?? 0.0,
               isCustomOrEstimated: false,
             );
             if (loc.latitude != 0.0) {
@@ -1945,21 +1945,27 @@ class LocationHierarchyRepository {
           .get(Uri.parse('/api/location/pincode/$clean'))
           .timeout(const Duration(seconds: 3));
       if (res.statusCode == 200) {
-        final data = jsonDecode(res.body);
-        if (data['success'] == true && data['offices'] is List) {
-          final List offices = data['offices'];
-          final lat = (data['latitude'] as num?)?.toDouble() ?? 0.0;
-          final lng = (data['longitude'] as num?)?.toDouble() ?? 0.0;
+        final dynamic decoded = jsonDecode(res.body);
+        if (decoded is Map<String, dynamic> &&
+            decoded['success'] == true &&
+            decoded['offices'] is List) {
+          final offices = decoded['offices'] as List<dynamic>;
+          final lat = (decoded['latitude'] as num?)?.toDouble() ?? 0.0;
+          final lng = (decoded['longitude'] as num?)?.toDouble() ?? 0.0;
+          final defaultState = decoded['state']?.toString() ?? 'India';
+          final defaultDistrict = decoded['district']?.toString() ?? '';
+          final defaultMandal = decoded['mandal']?.toString() ?? '';
           return offices.map((o) {
+            final office = o is Map<String, dynamic> ? o : <String, dynamic>{};
             return AdministrativeLocation(
               country: 'India',
-              state: o['state']?.toString() ?? data['state'] ?? 'India',
-              district: o['district']?.toString() ?? data['district'] ?? '',
-              mandal: o['mandal']?.toString() ?? data['mandal'] ?? '',
-              townOrVillage: o['name']?.toString() ?? '',
+              state: office['state']?.toString() ?? defaultState,
+              district: office['district']?.toString() ?? defaultDistrict,
+              mandal: office['mandal']?.toString() ?? defaultMandal,
+              townOrVillage: office['name']?.toString() ?? '',
               pincode: clean,
-              latitude: (o['latitude'] as num?)?.toDouble() ?? lat,
-              longitude: (o['longitude'] as num?)?.toDouble() ?? lng,
+              latitude: (office['latitude'] as num?)?.toDouble() ?? lat,
+              longitude: (office['longitude'] as num?)?.toDouble() ?? lng,
               isCustomOrEstimated: false,
             );
           }).toList();
@@ -2042,10 +2048,13 @@ class LocationHierarchyRepository {
           .get(Uri.parse('/api/location/search?q=${Uri.encodeComponent(query)}'))
           .timeout(const Duration(seconds: 3));
       if (res.statusCode == 200) {
-        final data = jsonDecode(res.body);
-        if (data['success'] == true && data['results'] is List) {
-          final List list = data['results'];
+        final dynamic decoded = jsonDecode(res.body);
+        if (decoded is Map<String, dynamic> &&
+            decoded['success'] == true &&
+            decoded['results'] is List) {
+          final list = decoded['results'] as List<dynamic>;
           for (final item in list) {
+            if (item is! Map<String, dynamic>) continue;
             final lat = (item['latitude'] as num?)?.toDouble() ?? 0.0;
             final lng = (item['longitude'] as num?)?.toDouble() ?? 0.0;
             if (lat != 0.0 && lng != 0.0) {

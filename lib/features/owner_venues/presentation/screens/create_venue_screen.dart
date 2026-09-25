@@ -592,7 +592,7 @@ class _CreateVenueScreenState extends ConsumerState<CreateVenueScreen> {
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Container(
                         color: Colors.grey.shade200,
-                        alignment: Alignment.Center,
+                        alignment: Alignment.center,
                         child: const Icon(Icons.broken_image, size: 40),
                       ),
                     ),
@@ -601,7 +601,7 @@ class _CreateVenueScreenState extends ConsumerState<CreateVenueScreen> {
                 const SizedBox(height: 12),
                 const Text(
                   'Review your venue photo before adding it to the listing gallery.',
-                  textAlign: TextAlign.Center,
+                  textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 12),
                 ),
                 const SizedBox(height: 16),
@@ -748,7 +748,7 @@ class _CreateVenueScreenState extends ConsumerState<CreateVenueScreen> {
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => Container(
                             color: Colors.grey.shade100,
-                            alignment: Alignment.Center,
+                            alignment: Alignment.center,
                             child: const Text('Unable to preview link', style: TextStyle(fontSize: 11)),
                           ),
                         ),
@@ -1438,7 +1438,7 @@ class _CreateVenueScreenState extends ConsumerState<CreateVenueScreen> {
                                             fit: BoxFit.cover,
                                             errorBuilder: (_, __, ___) => Container(
                                               color: Colors.grey.shade300,
-                                              alignment: Alignment.Center,
+                                              alignment: Alignment.center,
                                               child: const Icon(Icons.broken_image),
                                             ),
                                           ),
@@ -1552,7 +1552,7 @@ class _CreateVenueScreenState extends ConsumerState<CreateVenueScreen> {
                     return ActionChip(
                       label: Text('+ $title', style: const TextStyle(fontSize: 11)),
                       onPressed: () {
-                        if (_photos.none((p) => p.url == presetUrl)) {
+                        if (!_photos.any((p) => p.url == presetUrl)) {
                           setState(() {
                             _photos.add(GalleryPhoto(
                               id: 'preset_${DateTime.now().millisecondsSinceEpoch}',
@@ -1785,7 +1785,7 @@ class _CreateVenueScreenState extends ConsumerState<CreateVenueScreen> {
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Container(
                         color: Colors.grey.shade200,
-                        alignment: Alignment.Center,
+                        alignment: Alignment.center,
                         child: const Icon(Icons.stadium, size: 50),
                       ),
                     ),

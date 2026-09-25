@@ -137,7 +137,7 @@ class _OwnerCategoriesScreenState extends ConsumerState<OwnerCategoriesScreen> {
                           final cat = filtered[index];
                           return Card(
                             elevation: 0,
-                            shape: RoundedCornerShapeBorder(
+                            shape: RoundedRectangleBorder(
                               side: BorderSide(
                                 color: cat.isActive
                                     ? theme.colorScheme.outlineVariant.withValues(alpha: 0.6)
@@ -155,7 +155,7 @@ class _OwnerCategoriesScreenState extends ConsumerState<OwnerCategoriesScreen> {
                                       : Colors.grey.withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
-                                alignment: Alignment.Center,
+                                alignment: Alignment.center,
                                 child: Text(
                                   cat.icon?.isNotEmpty == true ? cat.icon! : '🏷️',
                                   style: const TextStyle(fontSize: 22),

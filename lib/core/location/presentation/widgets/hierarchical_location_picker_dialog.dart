@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../theme/app_theme.dart';
-import '../domain/location_hierarchy.dart';
-import '../presentation/user_location_provider.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../domain/location_hierarchy.dart';
+import '../user_location_provider.dart';
 
 /// Interactive modal sheet and dialog for hierarchical location selection:
 /// Country -> State -> District -> Mandal -> Town/Village OR 6-digit PIN code lookup.

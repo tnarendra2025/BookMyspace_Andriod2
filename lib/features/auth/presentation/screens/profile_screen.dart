@@ -9,6 +9,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 import '../auth_providers.dart';
+import '../../domain/auth_state.dart';
 import '../widgets/edit_profile_modal.dart';
 
 /// Full-featured Profile Screen with instant Edit Profile modal support,
@@ -21,7 +22,7 @@ class ProfileScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context);
     final authState = ref.watch(authNotifierProvider);
-    final user = authState.user;
+    final user = authState is AuthAuthenticated ? authState.user : null;
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
@@ -228,7 +229,8 @@ class ProfileScreen extends ConsumerWidget {
                         title: 'My Bookings',
                         count: '3 Active',
                         color: Colors.blue,
-                        onTap: () => context.push(AppRoutes.bookings),
+                        // /bookings is a shell tab: `go`, not `push`.
+                        onTap: () => context.go(AppRoutes.bookings),
                       ),
                     ),
                     const SizedBox(width: 12),

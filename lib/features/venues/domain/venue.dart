@@ -411,4 +411,27 @@ class VenueSearchQuery {
       sortBy: sortBy ?? this.sortBy,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is VenueSearchQuery &&
+          other.query == query &&
+          other.categoryId == categoryId &&
+          other.categorySlug == categorySlug &&
+          other.city == city &&
+          other.minPrice == minPrice &&
+          other.maxPrice == maxPrice &&
+          other.sortBy == sortBy;
+
+  @override
+  int get hashCode => Object.hash(
+        query,
+        categoryId,
+        categorySlug,
+        city,
+        minPrice,
+        maxPrice,
+        sortBy,
+      );
 }

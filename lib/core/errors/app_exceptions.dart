@@ -67,6 +67,11 @@ class ConfigurationException extends AppException {
   const ConfigurationException(super.message, {super.code});
 }
 
+/// Thrown when payload or data validation fails.
+class ValidationException extends AppException {
+  const ValidationException(super.message, {super.code});
+}
+
 /// Convert a raw error into a typed [AppException] for presentation.
 AppException mapError(Object error) {
   if (error is AppException) return error;

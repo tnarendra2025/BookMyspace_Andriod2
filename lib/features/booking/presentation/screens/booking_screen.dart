@@ -244,7 +244,7 @@ class _DateStrip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         scrollDirection: Axis.horizontal,
         itemCount: dates.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, i) {
           final date = dates[i];
           final isSelected =

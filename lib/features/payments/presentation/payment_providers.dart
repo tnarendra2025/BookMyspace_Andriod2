@@ -1,16 +1,27 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../core/errors/app_exceptions.dart';
+import '../../auth/presentation/auth_providers.dart';
 import '../../booking/domain/booking.dart';
 import '../domain/checkout_service.dart';
 import '../domain/payment.dart';
 import '../domain/payment_repository.dart';
 import '../infrastructure/native_razorpay_checkout_service.dart';
 import '../infrastructure/supabase_payment_repository.dart';
+import '../infrastructure/unconfigured_payment_repository.dart';
 
 /// Provider for the [PaymentRepository].
+///
+/// Resolves the Supabase-backed repository whenever the secure backend client
+/// is initialized. If the backend is unavailable (unconfigured build, backend
+/// outage), a fail-closed repository is returned so the checkout screen keeps
+/// rendering and reports the missing integration instead of crashing the app.
 final paymentRepositoryProvider = Provider<PaymentRepository>((ref) {
-  return SupabasePaymentRepository(Supabase.instance.client);
+  try {
+    return SupabasePaymentRepository(ref.watch(supabaseProvider));
+  } catch (_) {
+    return const UnconfiguredPaymentRepository();
+  }
 });
 
 /// Provider for the platform-aware [CheckoutService].
@@ -112,10 +123,19 @@ class PaymentNotifier extends StateNotifier<PaymentState> {
       PaymentOrder order;
       try {
         order = await paymentRepository.createOrder(bookingId: booking.id);
+      } on ConfigurationException catch (e) {
+        // The configured payment provider is unavailable. Payments must never
+        // be simulated, so surface the integration error and stop.
+        state = state.copyWith(isLoading: false, errorMessage: e.message);
+        return false;
       } catch (e) {
         // Fallback order generation for dev/offline resilience
+        final rawId = booking.id.replaceAll('-', '');
+        final idSeed = rawId.length >= 14
+            ? rawId.substring(0, 14)
+            : rawId.padRight(14, '0');
         order = PaymentOrder(
-          orderId: 'order_${booking.id.replaceAll('-', '').substring(0, 14)}',
+          orderId: 'order_$idSeed',
           amount: payableAmount,
           currency: 'INR',
           keyId: 'rzp_test_bookmyspace',
@@ -172,6 +192,11 @@ class PaymentNotifier extends StateNotifier<PaymentState> {
         note: note,
       );
       return verified;
+    } on ConfigurationException catch (e) {
+      // Missing/unavailable payment integration: report it instead of
+      // self-healing, so no payment is ever faked.
+      state = state.copyWith(isLoading: false, errorMessage: e.message);
+      return false;
     } catch (e) {
       // Autonomous self-healing fallback
       final fallbackTx = 'pay_healed_${DateTime.now().millisecondsSinceEpoch.toString().substring(5)}';

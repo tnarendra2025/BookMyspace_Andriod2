@@ -137,4 +137,34 @@ class MockBookingRepository implements BookingRepository {
     }
     _bookings.removeWhere((b) => b.id == bookingId);
   }
+
+  @override
+  Future<Booking> checkInBooking(String qrOrRef) async {
+    final existingIndex = _bookings.indexWhere(
+      (b) => b.id == qrOrRef || b.bookingRef == qrOrRef,
+    );
+    if (existingIndex != -1) {
+      final old = _bookings[existingIndex];
+      final updated = Booking(
+        id: old.id,
+        bookingRef: old.bookingRef,
+        venueId: old.venueId,
+        slotId: old.slotId,
+        bookDate: old.bookDate,
+        startTime: old.startTime,
+        endTime: old.endTime,
+        status: BookingStatus.completed,
+        amount: old.amount,
+        taxAmount: old.taxAmount,
+        totalAmount: old.totalAmount,
+        venueName: old.venueName,
+        venueCity: old.venueCity,
+        slotLabel: old.slotLabel,
+        createdAt: old.createdAt,
+      );
+      _bookings[existingIndex] = updated;
+      return updated;
+    }
+    return sampleBooking(id: qrOrRef, status: BookingStatus.completed);
+  }
 }

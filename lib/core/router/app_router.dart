@@ -17,21 +17,20 @@ import '../../features/debug/presentation/screens/debug_menu_screen.dart';
 import '../../features/events/presentation/screens/event_detail_screen.dart';
 import '../../features/events/presentation/screens/events_list_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
-import '../../features/notifications/presentation/screens/notifications_screen.dart';
-import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
-import '../../features/owner/presentation/screens/owner_dashboard_screen.dart';
-import '../../features/owner/presentation/screens/owner_registration_screen.dart';
-import '../../features/owner/presentation/screens/owner_categories_screen.dart';
-import '../../features/owner_venues/presentation/screens/owner_venues_screen.dart';
-import '../../features/owner_venues/presentation/screens/create_venue_screen.dart';
 import '../../features/legal/presentation/screens/privacy_policy_screen.dart';
 import '../../features/legal/presentation/screens/terms_of_service_screen.dart';
+import '../../features/map/presentation/screens/venue_map_screen.dart';
+import '../../features/notifications/presentation/screens/notifications_screen.dart';
+import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
+import '../../features/owner/presentation/screens/owner_categories_screen.dart';
+import '../../features/owner/presentation/screens/owner_dashboard_screen.dart';
+import '../../features/owner/presentation/screens/owner_registration_screen.dart';
+import '../../features/owner_venues/presentation/screens/create_venue_screen.dart';
+import '../../features/owner_venues/presentation/screens/owner_venues_screen.dart';
 import '../../features/payments/presentation/screens/payment_screen.dart';
 import '../../features/qr_checkin/presentation/screens/qr_check_in_scanner_screen.dart';
-import '../../features/saved/presentation/screens/saved_screen.dart';
 import '../../features/search/presentation/screens/search_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
-import '../../features/map/presentation/screens/venue_map_screen.dart';
 import '../../features/support/presentation/screens/support_screen.dart';
 import '../../features/venues/domain/venue.dart';
 import '../../features/venues/presentation/screens/venue_details_screen.dart';
@@ -181,6 +180,12 @@ GoRouter createAppRouter({
           return BookingScreen(venue: venue);
         },
       ),
+      // /courses (list) and /notifications are shell tabs, so they are defined
+      // ONLY inside the shell branches below. They used to also exist as
+      // top-level routes, which gave go_router two matches for one location
+      // and made navigation resolve back to the shell tab. One canonical route
+      // per location. /events, /events/:id and /courses/:id are not shell tabs,
+      // so they stay here as the single definition.
       GoRoute(
         path: AppRoutes.eventsList,
         parentNavigatorKey: rootNavigatorKey,
@@ -193,21 +198,11 @@ GoRouter createAppRouter({
             EventDetailScreen(eventId: state.pathParameters['id'] ?? ''),
       ),
       GoRoute(
-        path: AppRoutes.coursesList,
-        parentNavigatorKey: rootNavigatorKey,
-        builder: (context, state) => const CoursesListScreen(),
-      ),
-      GoRoute(
         path: AppRoutes.courseDetails,
         parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) => CourseDetailScreen(
           courseId: state.pathParameters['id'] ?? '',
         ),
-      ),
-      GoRoute(
-        path: AppRoutes.notifications,
-        parentNavigatorKey: rootNavigatorKey,
-        builder: (context, state) => const NotificationsScreen(),
       ),
       GoRoute(
         path: AppRoutes.analytics,
@@ -292,77 +287,102 @@ GoRouter createAppRouter({
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
-          return _AppShell(navigationShell: navigationShell);
+          return _AppShell(
+            navigationShell: navigationShell,
+            branchCount: _shellBranches.length,
+          );
         },
-        branches: [
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: AppRoutes.home,
-                builder: (context, state) => const HomeScreen(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: AppRoutes.notifications,
-                builder: (context, state) => const NotificationsScreen(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: AppRoutes.search,
-                builder: (context, state) {
-                  final extra = state.extra;
-                  final category = extra is Map<String, dynamic>
-                      ? extra['category'] as String?
-                      : null;
-                  return SearchScreen(initialCategory: category);
-                },
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: AppRoutes.bookings,
-                builder: (context, state) => const MyBookingsScreen(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: AppRoutes.coursesList,
-                builder: (context, state) => const CoursesListScreen(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: AppRoutes.profile,
-                builder: (context, state) => const ProfileScreen(),
-              ),
-            ],
-          ),
-        ],
+        branches: _shellBranches,
       ),
     ],
   );
 }
 
+/// Bottom-nav tab order. MUST stay index-aligned with the `NavigationBar`
+/// destinations in [_AppShell]; `_AppShell` asserts the two counts match.
+/// 0 Home, 1 Notifications, 2 Search, 3 Bookings, 4 Courses, 5 Profile.
+final List<StatefulShellBranch> _shellBranches = [
+  StatefulShellBranch(
+    routes: [
+      GoRoute(
+        path: AppRoutes.home,
+        builder: (context, state) => const HomeScreen(),
+      ),
+    ],
+  ),
+  StatefulShellBranch(
+    routes: [
+      GoRoute(
+        path: AppRoutes.notifications,
+        builder: (context, state) => const NotificationsScreen(),
+      ),
+    ],
+  ),
+  StatefulShellBranch(
+    routes: [
+      GoRoute(
+        path: AppRoutes.search,
+        builder: (context, state) {
+          final extra = state.extra;
+          final extraCategory = extra is Map<String, dynamic>
+              ? extra['category'] as String?
+              : null;
+          // Home navigates with `?category=<slug>`; support both that
+          // deep-linkable query param and the legacy extra map.
+          final queryCategory = state.uri.queryParameters['category'];
+          return SearchScreen(
+            initialCategory: extraCategory ?? queryCategory,
+          );
+        },
+      ),
+    ],
+  ),
+  StatefulShellBranch(
+    routes: [
+      GoRoute(
+        path: AppRoutes.bookings,
+        builder: (context, state) => const MyBookingsScreen(),
+      ),
+    ],
+  ),
+  StatefulShellBranch(
+    routes: [
+      GoRoute(
+        path: AppRoutes.coursesList,
+        builder: (context, state) => const CoursesListScreen(),
+      ),
+    ],
+  ),
+  StatefulShellBranch(
+    routes: [
+      GoRoute(
+        path: AppRoutes.profile,
+        builder: (context, state) => const ProfileScreen(),
+      ),
+    ],
+  ),
+];
+
 class _AppShell extends StatelessWidget {
-  const _AppShell({required this.navigationShell});
+  const _AppShell({required this.navigationShell, required this.branchCount});
 
   final StatefulNavigationShell navigationShell;
+
+  /// Number of branches in the shell, used to fail fast if the bottom bar and
+  /// the branch list ever drift apart.
+  final int branchCount;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    // Branch index == destination index. Drift here silently retargets the
+    // bottom nav (e.g. tapping "Courses" opening Events), so fail loudly.
+    assert(
+      _shellDestinationSpecs.length == branchCount,
+      'Shell has $branchCount branches but the bottom nav has '
+      '${_shellDestinationSpecs.length} destinations. Keep _shellBranches and '
+      '_shellDestinationSpecs index-aligned.',
+    );
     return Scaffold(
       body: navigationShell,
       bottomNavigationBar: NavigationBar(
@@ -374,41 +394,66 @@ class _AppShell extends StatelessWidget {
           );
         },
         destinations: [
-          NavigationDestination(
-            icon: const Icon(Icons.home_outlined),
-            selectedIcon: const Icon(Icons.home_rounded),
-            label: l10n.navHome,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.notifications_outlined),
-            selectedIcon: const Icon(Icons.notifications_rounded),
-            label: l10n.notifications,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.search_outlined),
-            selectedIcon: const Icon(Icons.search_rounded),
-            label: l10n.navSearch,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.receipt_long_outlined),
-            selectedIcon: const Icon(Icons.receipt_long_rounded),
-            label: l10n.navBookings,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.school_outlined),
-            selectedIcon: const Icon(Icons.school_rounded),
-            label: l10n.courses,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.person_outline_rounded),
-            selectedIcon: const Icon(Icons.person_rounded),
-            label: l10n.navProfile,
-          ),
+          for (var i = 0; i < _tabCount; i++)
+            NavigationDestination(
+              icon: Icon(_shellDestinationSpecs[i].icon),
+              selectedIcon: Icon(_shellDestinationSpecs[i].selectedIcon),
+              label: _shellTabLabels[i](l10n),
+            ),
         ],
       ),
     );
   }
+
+  /// Safe in release builds too, where the [assert] above is stripped.
+  int get _tabCount =>
+      _shellDestinationSpecs.length < _shellTabLabels.length
+      ? _shellDestinationSpecs.length
+      : _shellTabLabels.length;
 }
+
+/// Icon pair for a bottom-nav destination. MUST stay index-aligned with
+/// [_shellBranches] and [_shellTabLabels].
+class _ShellDestinationSpec {
+  const _ShellDestinationSpec({required this.icon, required this.selectedIcon});
+
+  final IconData icon;
+  final IconData selectedIcon;
+}
+
+const List<_ShellDestinationSpec> _shellDestinationSpecs = [
+  _ShellDestinationSpec(icon: Icons.home_outlined, selectedIcon: Icons.home_rounded),
+  _ShellDestinationSpec(
+    icon: Icons.notifications_outlined,
+    selectedIcon: Icons.notifications_rounded,
+  ),
+  _ShellDestinationSpec(
+    icon: Icons.search_outlined,
+    selectedIcon: Icons.search_rounded,
+  ),
+  _ShellDestinationSpec(
+    icon: Icons.receipt_long_outlined,
+    selectedIcon: Icons.receipt_long_rounded,
+  ),
+  _ShellDestinationSpec(
+    icon: Icons.school_outlined,
+    selectedIcon: Icons.school_rounded,
+  ),
+  _ShellDestinationSpec(
+    icon: Icons.person_outline_rounded,
+    selectedIcon: Icons.person_rounded,
+  ),
+];
+
+/// Localized labels for the bottom-nav destinations, in branch order.
+final List<String Function(AppLocalizations)> _shellTabLabels = [
+  (l10n) => l10n.navHome,
+  (l10n) => l10n.notifications,
+  (l10n) => l10n.navSearch,
+  (l10n) => l10n.navBookings,
+  (l10n) => l10n.courses,
+  (l10n) => l10n.navProfile,
+];
 
 // Temporary placeholder replaced with a real screen in a later milestone.
 class ProfilePlaceholderScreen extends StatelessWidget {

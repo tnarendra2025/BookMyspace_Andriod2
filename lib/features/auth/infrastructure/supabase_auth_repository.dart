@@ -165,6 +165,32 @@ class SupabaseAuthRepository implements AuthRepository {
     }
   }
 
+  @override
+  Future<domain.AuthUser> updateProfile({
+    String? fullName,
+    String? avatarUrl,
+  }) async {
+    try {
+      final response = await _client.auth.updateUser(
+        UserAttributes(
+          data: {
+            if (fullName != null) 'full_name': fullName,
+            if (avatarUrl != null) 'avatar_url': avatarUrl,
+          },
+        ),
+      );
+      final user = response.user;
+      if (user != null) {
+        return _toUser(user);
+      }
+      throw const AppAuthException('Failed to update profile');
+    } on AuthException catch (e) {
+      throw AppAuthException(e.message);
+    } catch (e) {
+      throw mapError(e);
+    }
+  }
+
   domain.AuthUser _toUser(User u) {
     final rolesList = <String>[];
     final appRoles = u.appMetadata['roles'];

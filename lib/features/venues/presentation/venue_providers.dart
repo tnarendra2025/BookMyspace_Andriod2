@@ -59,9 +59,26 @@ final searchQueryProvider = StateProvider<VenueSearchQuery>((ref) {
   return const VenueSearchQuery();
 });
 
-/// Search results provider driven by searchQueryProvider.
+/// Search results provider driven by [searchQueryProvider] (user-applied
+/// filters + text query).
+///
+/// Home category taps pass their slug via `SearchScreen.initialCategory`;
+/// that path must NOT write the provider during build/navigation (it aborted
+/// the Home->Search push back to /home in tests and blinked in prod).
 final searchResultsProvider = FutureProvider<List<Venue>>((ref) {
   final query = ref.watch(searchQueryProvider);
+  return ref.watch(venueRepositoryProvider).search(query);
+});
+
+/// Search results provider for an explicit query (e.g. Home category taps pass
+/// the slug via SearchScreen.initialCategory). Lets SearchScreen display
+/// category-filtered results without writing to [searchQueryProvider] during
+/// build/navigation.
+final searchResultsForProvider =
+    FutureProvider.autoDispose.family<List<Venue>, VenueSearchQuery>((
+  ref,
+  query,
+) {
   return ref.watch(venueRepositoryProvider).search(query);
 });
 
@@ -121,3 +138,6 @@ final savedVenuesProvider = FutureProvider<List<Venue>>((ref) {
   if (user == null) return [];
   return ref.watch(venueRepositoryProvider).favorites();
 });
+
+/// Alias for savedVenuesProvider.
+final favoritesProvider = savedVenuesProvider;

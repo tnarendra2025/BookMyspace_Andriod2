@@ -93,7 +93,9 @@ class Payment {
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
-  factory Payment.fromJson(Map<String, dynamic> json) => Payment(
+  factory Payment.fromJson(Map<String, dynamic> json) {
+    final status = PaymentStatus.fromDb(json['status'] as String? ?? 'pending');
+    return Payment(
         id: json['id'] as String? ?? '',
         bookingId: json['booking_id'] as String? ?? '',
         userId: json['user_id'] as String? ?? '',
@@ -102,15 +104,17 @@ class Payment {
         providerPaymentId: json['provider_payment_id'] as String?,
         amount: (json['amount'] as num?)?.toDouble() ?? 0.0,
         currency: json['currency'] as String? ?? 'INR',
-        status: PaymentStatus.fromDb(json['status'] as String? ?? 'pending'),
+        status: status,
         method: json['method'] as String?,
-        isRefundable: json['is_refundable'] as bool? ?? true,
+        isRefundable: json['is_refundable'] as bool? ??
+            (status != PaymentStatus.refunded),
         metadata: json['metadata'] is Map<String, dynamic>
             ? json['metadata'] as Map<String, dynamic>
             : null,
         createdAt: DateTime.tryParse(json['created_at'] as String? ?? ''),
         updatedAt: DateTime.tryParse(json['updated_at'] as String? ?? ''),
       );
+  }
 
   Map<String, dynamic> toJson() => {
         'id': id,

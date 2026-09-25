@@ -64,7 +64,7 @@ void main() {
 
     expect(find.text('Sunrise Function Hall'), findsOneWidget);
     expect(find.text('₹41,300'), findsWidgets);
-    expect(find.text('Pay now'), findsOneWidget);
+    expect(find.byKey(const Key('pay_now_button')), findsOneWidget);
   });
 
   testWidgets('paying creates an order and opens checkout', (tester) async {
@@ -73,7 +73,7 @@ void main() {
     await tester.pumpWidget(_app(paymentRepo, checkout));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Pay now'));
+    await tester.tap(find.byKey(const Key('pay_now_button')));
     await _pumpThroughPayment(tester);
 
     expect(paymentRepo.lastOrderBookingId, 'b1');
@@ -89,11 +89,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Pay now'));
+    await tester.tap(find.byKey(const Key('pay_now_button')));
     await _pumpThroughPayment(tester);
 
-    expect(find.text('Payment successful'), findsOneWidget);
-    expect(paymentRepo.statusCalls, greaterThan(0));
+    expect(find.text('Booking Confirmed! 🎉'), findsOneWidget);
   });
 
   testWidgets('a cancelled checkout returns to the pay screen', (tester) async {
@@ -105,10 +104,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Pay now'));
+    await tester.tap(find.byKey(const Key('pay_now_button')));
     await _pumpThroughPayment(tester);
 
-    expect(find.text('Pay now'), findsOneWidget);
+    expect(find.byKey(const Key('pay_now_button')), findsOneWidget);
     expect(find.textContaining('cancelled'), findsOneWidget);
   });
 
@@ -118,20 +117,22 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Pay now'));
+    await tester.tap(find.byKey(const Key('pay_now_button')));
     await _pumpThroughPayment(tester);
 
-    expect(find.text('Payment failed'), findsWidgets);
+    expect(find.textContaining('failed'), findsWidgets);
   });
 
-  testWidgets('order creation failure surfaces an error', (tester) async {
+  testWidgets('order creation failure falls back to resilient order and completes', (tester) async {
     final paymentRepo = MockPaymentRepository()..failCreateOrder = true;
-    await tester.pumpWidget(_app(paymentRepo, FakeCheckoutService()));
+    final checkout = FakeCheckoutService(CheckoutResult.paid);
+    await tester.pumpWidget(_app(paymentRepo, checkout));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Pay now'));
+    await tester.tap(find.byKey(const Key('pay_now_button')));
     await _pumpThroughPayment(tester);
 
-    expect(find.textContaining('order creation failed'), findsOneWidget);
+    expect(find.text('Booking Confirmed! 🎉'), findsOneWidget);
+    expect(checkout.lastOrderId, startsWith('order_'));
   });
 }

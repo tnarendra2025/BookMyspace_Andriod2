@@ -474,7 +474,7 @@ class _NotificationTile extends StatelessWidget {
                       : theme.colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                alignment: Alignment.Center,
+                alignment: Alignment.center,
                 child: Text(typeIcon, style: const TextStyle(fontSize: 18)),
               ),
               const SizedBox(width: 12),

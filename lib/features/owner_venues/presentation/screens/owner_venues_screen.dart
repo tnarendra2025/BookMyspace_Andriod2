@@ -160,7 +160,7 @@ class _OwnerVenuesScreenState extends ConsumerState<OwnerVenuesScreen> {
                     const SizedBox(height: 8),
                     Text(
                       'Add your banquet hall, conference room, lawn, or coworking space to start hosting bookings.',
-                      textAlign: TextAlign.Center,
+                      textAlign: TextAlign.center,
                       style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
                     ),
                     const SizedBox(height: 24),
@@ -316,7 +316,7 @@ class _OwnerVenuesScreenState extends ConsumerState<OwnerVenuesScreen> {
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => Container(
                     color: Colors.grey.shade200,
-                    alignment: Alignment.Center,
+                    alignment: Alignment.center,
                     child: const Icon(Icons.stadium),
                   ),
                 ),

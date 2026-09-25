@@ -1,5 +1,5 @@
-import '../../venues/domain/venue.dart';
-import '../../venues/domain/venue_repository.dart';
+import 'package:bookmyspace/features/venues/domain/venue.dart';
+import 'package:bookmyspace/features/venues/domain/venue_repository.dart';
 
 class MockVenueRepository implements VenueRepository {
   bool failRequests = false;
@@ -8,8 +8,10 @@ class MockVenueRepository implements VenueRepository {
   final List<Venue> _mockVenues = [
     const Venue(
       id: 'v1',
-      name: 'Grand Function Palace',
+      name: 'Sunrise Function Hall',
       slug: 'grand-function-palace',
+      description:
+          'A spacious function hall with modern amenities, ideal for weddings, receptions and corporate events.',
       city: 'Hyderabad',
       state: 'Telangana',
       latitude: 17.3850,
@@ -24,8 +26,10 @@ class MockVenueRepository implements VenueRepository {
     ),
     const Venue(
       id: 'v2',
-      name: 'Executive Boardroom',
+      name: 'The Work Nest',
       slug: 'executive-boardroom',
+      description:
+          'A quiet, fully equipped boardroom built for focused meetings, interviews and workshops.',
       city: 'Hyderabad',
       state: 'Telangana',
       latitude: 17.4400,
@@ -42,13 +46,15 @@ class MockVenueRepository implements VenueRepository {
       id: 'v3',
       name: 'Skyline Community Center',
       slug: 'skyline-community-center',
+      description:
+          'A community centre with open halls and activity rooms for classes, meetups and celebrations.',
       city: 'Hyderabad',
       state: 'Telangana',
       latitude: 17.4123,
       longitude: 78.4080,
       capacity: 250,
-      pricingBaseAmount: 20000,
-      price: 20000,
+      pricingBaseAmount: 2000,
+      price: 2000,
       avgRating: 4.9,
       ratingCount: 214,
       isVerified: true,
@@ -57,13 +63,59 @@ class MockVenueRepository implements VenueRepository {
   ];
 
   @override
-  Future<List<VenueCategory>> categories() async {
+  Future<List<VenueCategory>> categories({bool activeOnly = false}) async {
     if (failRequests) throw Exception('Network failure');
-    return const [
+    final cats = const [
       VenueCategory(id: 'c1', slug: 'function_hall', name: 'Function Hall'),
       VenueCategory(id: 'c2', slug: 'meeting_room', name: 'Meeting Room'),
       VenueCategory(id: 'c3', slug: 'party_hall', name: 'Party Hall'),
     ];
+    if (activeOnly) {
+      return cats.where((c) => c.isActive).toList();
+    }
+    return cats;
+  }
+
+  @override
+  Future<VenueCategory> addCategory({
+    required String name,
+    required String slug,
+    String? icon,
+    String? parentSection,
+    bool isActive = true,
+  }) async {
+    if (failRequests) throw Exception('Network failure');
+    return VenueCategory(
+      id: 'c_${DateTime.now().millisecondsSinceEpoch}',
+      name: name,
+      slug: slug,
+      icon: icon,
+      parentSection: parentSection ?? 'general',
+      isActive: isActive,
+    );
+  }
+
+  @override
+  Future<VenueCategory> updateCategory(VenueCategory category) async {
+    if (failRequests) throw Exception('Network failure');
+    return category;
+  }
+
+  @override
+  Future<void> setCategoryActive(String categoryId, bool isActive) async {
+    if (failRequests) throw Exception('Network failure');
+  }
+
+  @override
+  Future<List<Venue>> fetchVenuesByCategory({
+    required String categoryId,
+    int limit = 50,
+  }) async {
+    if (failRequests) throw Exception('Network failure');
+    return _mockVenues
+        .where((v) => v.category?.id == categoryId)
+        .take(limit)
+        .toList();
   }
 
   @override

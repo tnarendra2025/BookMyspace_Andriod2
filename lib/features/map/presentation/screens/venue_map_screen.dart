@@ -10,7 +10,6 @@ import 'package:latlong2/latlong.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/location/presentation/user_location_provider.dart';
 import '../../../../core/location/presentation/widgets/hierarchical_location_picker_dialog.dart';
-import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/animated_category_chip.dart';
 import '../../../../core/widgets/empty_state.dart';
@@ -315,7 +314,7 @@ class _VenueMapScreenState extends ConsumerState<VenueMapScreen> {
             if (context.canPop()) {
               context.pop();
             } else {
-              context.go(AppRoutes.home);
+              context.go('/home');
             }
           },
         ),
@@ -383,7 +382,7 @@ class _VenueMapScreenState extends ConsumerState<VenueMapScreen> {
                           // Left side: Interactive Map (55% width)
                           Expanded(
                             flex: 55,
-                            child: _buildFlutterMap(markers, venues, locState),
+                            child: _buildFlutterMap(markers, venues),
                           ),
                           // Vertical divider
                           const VerticalDivider(width: 1, thickness: 1),
@@ -400,7 +399,7 @@ class _VenueMapScreenState extends ConsumerState<VenueMapScreen> {
                         children: [
                           Expanded(
                             flex: 55,
-                            child: _buildFlutterMap(markers, venues, locState),
+                            child: _buildFlutterMap(markers, venues),
                           ),
                           const Divider(height: 1, thickness: 1),
                           Expanded(
@@ -581,7 +580,7 @@ class _VenueMapScreenState extends ConsumerState<VenueMapScreen> {
                 return ListView.separated(
                   scrollDirection: Axis.horizontal,
                   itemCount: categories.length + 1,
-                  separatorBuilder: (_, _) => const SizedBox(width: 8),
+                  separatorBuilder: (_, __) => const SizedBox(width: 8),
                   itemBuilder: (context, index) {
                     if (index == 0) {
                       final isAll = query.categorySlug == null;
@@ -623,7 +622,7 @@ class _VenueMapScreenState extends ConsumerState<VenueMapScreen> {
                   ],
                 ),
               ),
-              error: (_, _) => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
             ),
           ),
         ],
@@ -740,7 +739,7 @@ class _VenueMapScreenState extends ConsumerState<VenueMapScreen> {
       controller: _listScrollController,
       padding: const EdgeInsets.all(12),
       itemCount: venues.length,
-      separatorBuilder: (_, _) => const SizedBox(height: 10),
+      separatorBuilder: (_, __) => const SizedBox(height: 10),
       itemBuilder: (context, index) {
         final venue = venues[index];
         final isSelected = venue.id == _selectedVenueId;

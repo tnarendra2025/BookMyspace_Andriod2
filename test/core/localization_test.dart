@@ -64,7 +64,7 @@ void main() {
 
       await tester.tap(find.text('Next'));
       await tester.pumpAndSettle();
-      expect(find.text('Book in seconds'), findsOneWidget);
+      expect(find.text('Real-Time Availability'), findsOneWidget);
     });
   });
 }
