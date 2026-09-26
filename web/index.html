@@ -24,8 +24,16 @@
 
   <title>BookMySpace</title>
 
-  <!-- Google Maps JavaScript API for Flutter Web -->
-  <script src="https://maps.googleapis.com/maps/api/js?key=default_maps_key"></script>
+  <!--
+    Map tiles: OpenStreetMap via flutter_map (TileLayer) in
+    lib/features/map/.../venue_map_screen.dart and
+    lib/features/venues/.../venue_details_screen.dart.
+
+    The Google Maps JavaScript API script that used to be loaded here was
+    removed: no Dart code imports google_maps_flutter, so it only produced
+    "InvalidKey" console errors and added a third-party dependency for maps
+    that are actually drawn with OSM raster tiles. No API key is required.
+  -->
 
   <style>
     body {

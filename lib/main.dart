@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app.dart';
 import 'core/config/test_mode.dart';
 import 'core/debug/debug_log.dart';
 import 'core/firebase/error_logger.dart';
+import 'features/auth/infrastructure/supabase_auth_repository.dart';
 import 'features/auth/presentation/auth_providers.dart';
 
 Future<void> main() async {
@@ -30,5 +32,17 @@ Future<void> main() async {
 
   DebugLog.info('STARTUP', 'Supabase initialised');
 
-  runApp(const ProviderScope(child: BookMySpaceApp()));
+  // Bind the concrete Supabase-backed AuthRepository. The provider itself
+  // throws by default so tests must supply their own, so the real app has to
+  // override it here or every auth read throws UnimplementedError.
+  runApp(
+    ProviderScope(
+      overrides: [
+        authRepositoryProvider.overrideWithValue(
+          SupabaseAuthRepository(Supabase.instance.client),
+        ),
+      ],
+      child: const BookMySpaceApp(),
+    ),
+  );
 }
