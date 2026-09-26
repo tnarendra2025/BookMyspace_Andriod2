@@ -258,4 +258,125 @@ void main() {
       expect(uri, AppRoutes.home);
     });
   });
+
+  // The router is now built once and its `redirect` reads a live [AuthGate]
+  // via `refreshListenable`. These prove the guards still fire when auth
+  // changes at runtime - they are not bypassed by holding onto the router.
+  group('AuthGate enforces guards reactively', () {
+    Future<GoRouter> gateRouter(
+      WidgetTester tester, {
+      required String initialLocation,
+      required AuthGate gate,
+    }) async {
+      final router = createAppRouter(
+        initialLocation: initialLocation,
+        authGate: gate,
+      );
+      addTearDown(router.dispose);
+      await tester.pumpWidget(_harness(router));
+      await tester.pumpAndSettle();
+      return router;
+    }
+
+    String pathOf(GoRouter router) =>
+        router.routeInformationProvider.value.uri.path;
+
+    testWidgets('stays inert while auth is still loading', (tester) async {
+      // No user and not ready: guards must not fire yet, or the user would be
+      // bounced to /login before the session is restored.
+      final router = await gateRouter(
+        tester,
+        initialLocation: AppRoutes.search,
+        gate: AuthGate(),
+      );
+      expect(pathOf(router), AppRoutes.search);
+    });
+
+    testWidgets('once ready with no user, protected route -> /login', (
+      tester,
+    ) async {
+      final gate = AuthGate();
+      final router = await gateRouter(
+        tester,
+        initialLocation: AppRoutes.search,
+        gate: gate,
+      );
+      expect(pathOf(router), AppRoutes.search);
+
+      gate.update(user: null, ready: true);
+      await tester.pumpAndSettle();
+      expect(pathOf(router), AppRoutes.login);
+    });
+
+    testWidgets('signing in while on /login moves to /home', (tester) async {
+      final gate = AuthGate(user: null, ready: true);
+      final router = await gateRouter(
+        tester,
+        initialLocation: AppRoutes.login,
+        gate: gate,
+      );
+      expect(pathOf(router), AppRoutes.login);
+
+      gate.update(user: _signedInUser, ready: true);
+      await tester.pumpAndSettle();
+      expect(pathOf(router), AppRoutes.home);
+    });
+
+    testWidgets('signing out while on /search bounces to /login', (
+      tester,
+    ) async {
+      final gate = AuthGate(user: _signedInUser, ready: true);
+      final router = await gateRouter(
+        tester,
+        initialLocation: AppRoutes.search,
+        gate: gate,
+      );
+      expect(pathOf(router), AppRoutes.search);
+
+      gate.update(user: null, ready: true);
+      await tester.pumpAndSettle();
+      expect(pathOf(router), AppRoutes.login);
+    });
+
+    testWidgets('non-admin is still blocked from /admin/audit', (tester) async {
+      final gate = AuthGate(user: _signedInUser, ready: true);
+      final router = await gateRouter(
+        tester,
+        initialLocation: AppRoutes.adminAudit,
+        gate: gate,
+      );
+      expect(pathOf(router), AppRoutes.home);
+    });
+
+    testWidgets('non-owner is still blocked from /owner/venues', (tester) async {
+      final gate = AuthGate(user: _signedInUser, ready: true);
+      final router = await gateRouter(
+        tester,
+        initialLocation: AppRoutes.ownerVenues,
+        gate: gate,
+      );
+      expect(pathOf(router), AppRoutes.home);
+    });
+
+    testWidgets('an unrelated user update does not move the location', (
+      tester,
+    ) async {
+      final gate = AuthGate(user: _signedInUser, ready: true);
+      final router = await gateRouter(
+        tester,
+        initialLocation: AppRoutes.search,
+        gate: gate,
+      );
+      final before = router.routeInformationProvider.value.uri.toString();
+
+      // Same id/roles (e.g. a profile name change): the gate must treat this
+      // as a no-op so no redirect churn happens.
+      gate.update(
+        user: const AuthUser(id: 'u1', email: 'a@b.com', fullName: 'Renamed'),
+        ready: true,
+      );
+      await tester.pumpAndSettle();
+      expect(router.routeInformationProvider.value.uri.toString(), before);
+    });
+  });
 }

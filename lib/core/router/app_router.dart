@@ -75,25 +75,83 @@ abstract class AppRoutes {
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 final shellNavigatorKey = GlobalKey<NavigatorState>();
 
+/// Live auth inputs consumed by the router's `redirect`.
+///
+/// The router must be created exactly once and outlive auth resolution.
+/// Supabase restores the session asynchronously, so for a short window after
+/// launch `authStateProvider` is still `loading` with no user; when it finally
+/// resolves, the app used to dispose the old GoRouter and build a new one at
+/// [AppRoutes.shell], which threw the user back to Home mid-navigation and
+/// collided on the shared navigator [GlobalKey]s.
+///
+/// Holding the auth values in [ValueNotifier]s lets [GoRouter.refreshListenable]
+/// re-run `redirect` in place instead, so guards stay enforced while the
+/// navigation stack is preserved.
+class AuthGate {
+  AuthGate({AuthUser? user, bool ready = false})
+    : _user = ValueNotifier<AuthUser?>(user),
+      _ready = ValueNotifier<bool>(ready);
+
+  final ValueNotifier<AuthUser?> _user;
+  final ValueNotifier<bool> _ready;
+
+  AuthUser? get user => _user.value;
+
+  /// False while the auth session is still being restored; the redirect
+  /// stays inert until then, exactly as before.
+  bool get ready => _ready.value;
+
+  /// Fires whenever a value the redirect depends on actually changes.
+  Listenable get listenable => Listenable.merge([_user, _ready]);
+
+  /// Pushes new auth state into the gate. No-ops when nothing the redirect
+  /// reads has changed, so a token refresh for the same user/roles does not
+  /// trigger a redirect re-evaluation at all.
+  void update({AuthUser? user, bool? ready}) {
+    if (ready != null && ready != _ready.value) {
+      _ready.value = ready;
+    }
+    final previous = _user.value;
+    if (user?.id != previous?.id ||
+        user?.isAdmin != previous?.isAdmin ||
+        user?.isOwner != previous?.isOwner) {
+      _user.value = user;
+    }
+  }
+
+  void dispose() {
+    _user.dispose();
+    _ready.dispose();
+  }
+}
+
 /// Creates the application router. [initialLocation] is overridable in tests.
 ///
 /// When [currentUser] is provided, protected routes redirect to the login
 /// screen for unauthenticated users, and signed-in users are bounced away from
 /// the onboarding/login screens. A `null` [currentUser] disables gating.
+///
+/// Pass [authGate] to keep the same router across auth changes; the gate is
+/// then the live source of truth and [currentUser]/[authReady] only seed it.
 GoRouter createAppRouter({
   String initialLocation = AppRoutes.shell,
   AuthUser? currentUser,
   bool authReady = true,
+  AuthGate? authGate,
 }) {
+  final gate = authGate ?? AuthGate(user: currentUser, ready: authReady);
   return GoRouter(
     navigatorKey: rootNavigatorKey,
     initialLocation: initialLocation,
+    refreshListenable: gate.listenable,
     redirect: (context, state) {
-      if (!authReady) return null;
+      // Read the gate on every evaluation, never a captured snapshot.
+      final user = gate.user;
+      if (!gate.ready) return null;
       final location = state.matchedLocation;
       final isPublic =
           location == AppRoutes.onboarding || location == AppRoutes.login;
-      if (currentUser == null) {
+      if (user == null) {
         return isPublic ? null : AppRoutes.login;
       }
       if (isPublic) {
@@ -103,7 +161,7 @@ GoRouter createAppRouter({
       // Role-based route gating (strictly based on authenticated user's role without hardcoding IDs)
       final isAdminRoute =
           location == AppRoutes.adminAudit || location.startsWith('/admin');
-      if (isAdminRoute && !currentUser.isAdmin) {
+      if (isAdminRoute && !user.isAdmin) {
         // Redirect unauthorized non-admin users to home
         return AppRoutes.home;
       }
@@ -114,7 +172,7 @@ GoRouter createAppRouter({
           location == AppRoutes.ownerVenueCreate ||
           (location.startsWith('/owner') &&
               location != AppRoutes.ownerRegistration);
-      if (isOwnerRoute && !currentUser.isOwner) {
+      if (isOwnerRoute && !user.isOwner) {
         // Redirect unauthorized non-owner users to home
         return AppRoutes.home;
       }

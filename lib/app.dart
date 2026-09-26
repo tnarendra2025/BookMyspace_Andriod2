@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'core/config/settings_controller.dart';
 import 'core/localization/app_localizations.dart';
@@ -22,12 +22,15 @@ class BookMySpaceApp extends ConsumerStatefulWidget {
 }
 
 class _BookMySpaceAppState extends ConsumerState<BookMySpaceApp> {
+  /// Created once. The router owns the navigation stack, so rebuilding it
+  /// would discard the user's place in the app.
+  final AuthGate _authGate = AuthGate();
   GoRouter? _router;
-  String? _routerKey;
 
   @override
   void dispose() {
     _router?.dispose();
+    _authGate.dispose();
     super.dispose();
   }
 
@@ -37,25 +40,19 @@ class _BookMySpaceAppState extends ConsumerState<BookMySpaceApp> {
     ref.watch(pushNotificationServiceProvider);
 
     final authAsync = ref.watch(authStateProvider);
-    final currentUser = authAsync.value;
-    final authReady = !authAsync.isLoading;
 
-    // Keep the GoRouter instance stable across rebuilds (theme/locale changes,
-    // provider invalidations). Recreating GoRouter on every build resets the
-    // navigation stack to initialLocation, which surfaces as "tap a category
-    // -> back to Home" plus UI blinking. Only recreate when the auth gate
-    // inputs actually change.
-    final key =
-        '${widget.initialLocation}|$authReady|${currentUser?.id}|${currentUser?.roles.join(',')}';
-    if (_router == null || _routerKey != key) {
-      _router?.dispose();
-      _router = createAppRouter(
-        initialLocation: widget.initialLocation ?? AppRoutes.shell,
-        currentUser: currentUser,
-        authReady: authReady,
-      );
-      _routerKey = key;
-    }
+    // Feed auth into the existing router. Supabase restores the session
+    // asynchronously, so this flips from (loading, no user) to (ready, user)
+    // shortly after launch. Pushing it through the gate makes GoRouter
+    // re-run `redirect` in place; previously the key change below disposed the
+    // router and rebuilt it at /home, which reset the stack and collided on
+    // the shared navigator GlobalKeys.
+    _authGate.update(user: authAsync.value, ready: !authAsync.isLoading);
+
+    _router ??= createAppRouter(
+      initialLocation: widget.initialLocation ?? AppRoutes.shell,
+      authGate: _authGate,
+    );
     final router = _router!;
 
     return MaterialApp.router(
